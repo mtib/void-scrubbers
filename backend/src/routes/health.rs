@@ -1,11 +1,11 @@
-use rocket::serde::json::{Json, Value};
+use rocket::serde::json::Json;
 use rocket::serde::{Deserialize, Serialize};
 
 /// Response for health check endpoint
 #[derive(Serialize, Deserialize)]
 pub struct HealthResponse {
-    status: String,
-    version: String,
+    pub status: String,
+    pub version: String,
 }
 
 #[get("/")]

@@ -29,7 +29,7 @@ impl<'r> FromRequest<'r> for AuthenticatedUser {
         let auth_header = match request.headers().get_one("Authorization") {
             Some(header) => header,
             None => {
-                return Outcome::Failure((
+                return Outcome::Error((
                     Status::Unauthorized,
                     ApiError::Unauthorized("Missing Authorization header".to_string()),
                 ));
@@ -38,7 +38,7 @@ impl<'r> FromRequest<'r> for AuthenticatedUser {
 
         // Check if it's a Bearer token
         if !auth_header.starts_with("Bearer ") {
-            return Outcome::Failure((
+            return Outcome::Error((
                 Status::Unauthorized,
                 ApiError::Unauthorized("Invalid Authorization header format".to_string()),
             ));
@@ -52,7 +52,7 @@ impl<'r> FromRequest<'r> for AuthenticatedUser {
             Ok(claims) => Outcome::Success(AuthenticatedUser {
                 user_id: claims.sub,
             }),
-            Err(err) => Outcome::Failure((Status::Unauthorized, err)),
+            Err(err) => Outcome::Error((Status::Unauthorized, err)),
         }
     }
 }
