@@ -9,7 +9,6 @@
 
 # Packages and dependencies
 node_modules/
-package-lock.json
 yarn.lock
 bower_components/
 jspm_packages/
