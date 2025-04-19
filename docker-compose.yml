@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  # Frontend service
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+    networks:
+      - void-scrubbers-network
+
+  # Backend service
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+      - "9000:9000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/void_scrubbers
+      - JWT_SECRET=void_scrubbers_dev_secret_key
+      - PORT=8000
+      - WS_PORT=9000
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - void-scrubbers-network
+
+  # Database service
+  db:
+    image: postgres:15
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=void_scrubbers
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - void-scrubbers-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Optional: pgAdmin for database management
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@example.com
+      - PGADMIN_DEFAULT_PASSWORD=admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - db
+    networks:
+      - void-scrubbers-network
+
+networks:
+  void-scrubbers-network:
+    driver: bridge
+
+volumes:
+  postgres_data:

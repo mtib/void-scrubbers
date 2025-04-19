@@ -1,34 +1,60 @@
-# Legends of the void
+# Void Scrubbers
 
-This is a WIP indie browser game. These are the cornerstones of it:
+A work-in-progress indie browser game where little robots scrub a digital world of pollutants, using the very factories that produce them.
 
-- Idle RPG:
-  - You have an account, a characters that grow based on stuff you build in a factory-like environment
-  - The factory produces things, the production can be used to increase your characters stats. (Very much inspired by Factory)
-  - You can trade factory products with other players online on a market, this gives you the resource to build more, and them rare resources that they may not be able to produce. (Very much inspired by Screeps and FFXIV)
-  - You have to play the other parts of the game to unlock factory buildings, and randomly may be able to find raw resource nodes to put on your factory.
-  - There's a hierarchy of products, more complex producs may sell for more on the player-driven markets, but also are required for better character stat improvements.
-- Action RPG:
-  - Open world of islands the players can travel to.
-  - Monsters and resources spawn on the overworld. (Very much inspired by Flyff)
-  - Dungeon instances.
-  - Online: other people are there
-  - Top down (30deg-ish visually) rendered, twin-stick fighting (Very much inspired by cult of the lamb)
-- Couch-coop:
-  - Supports multiple players being logged in at once, playing their own character in split screen.
-  - They can individually pause and edit their factory while playing like this.
-  - They can visit each other's factory and help build it.
-  - They can play the Action RPG part of the game together
-- Online:
-  - Live online MMORPG using websockets
-  - Chat feature if not using controllers, (controllers get emotes)
-- Frontend:
-  - PixiJS + Vite + Typescript, deployed on GitHub pages
-  - Websockets
-- Backend:
-  - Rust + Rocket
-  - Websockets
-- Auth:
-  - one-time auth tokens tied to email, using mailgun
+## 🎮 Game Overview
 
-I'm no artist, so my plan is to buy an art asset bundle to get started.
+This project combines several gameplay elements to create a unique gaming experience:
+
+### Idle Factory Management
+- Upgrade your cleaning robots through factory-based resource management
+- Factory production system to enhance robot capabilities (inspired by [Factory Idle](https://factoryidle.com/))
+- Player-driven markets for trading factory products and cleaning supplies (inspired by [Screeps](https://screeps.com/) and [Final Fantasy XIV](https://www.finalfantasyxiv.com/))
+- Balance between factory output and pollution generation
+- Discover resource nodes in the world to expand your factory
+- Create complex products for better market value and robot enhancements
+
+### Action RPG Cleaning
+- Control your robots to scrub pollutants from the digital world
+- Explore an open world of digital islands
+- Encounter corrupted data entities and collect resources in the overworld (inspired by [Flyff](https://play.flyff.com/))
+- Clean heavily polluted dungeon instances
+- Experience a living online world with other cleaning robots
+- Enjoy top-down, twin-stick cleaning combat (inspired by [Cult of the Lamb](https://cultofthelamb.com/))
+
+### Couch Co-op
+- Support for multiple robots on the same screen
+- Individually pause and manage factories
+- Visit and help optimize each other's factories
+- Team up for more efficient pollution cleanup
+
+### Online Features
+- Live MMORPG experience using WebSockets
+- Text chat for keyboard/mouse players
+- Emote system for controller players
+
+## 🛠️ Technical Stack
+
+### Frontend
+- [PixiJS](https://pixijs.com/) + [Vite](https://vitejs.dev/) + [TypeScript](https://www.typescriptlang.org/)
+- Deployed on [GitHub Pages](https://pages.github.com/)
+- WebSockets for real-time communication
+
+### Backend
+- [Rust](https://www.rust-lang.org/) + [Rocket](https://rocket.rs/)
+- WebSockets for real-time updates
+
+### Authentication
+- One-time auth tokens tied to email using [Mailgun](https://www.mailgun.com/)
+
+## 🎨 Art & Assets
+Currently planning to purchase asset bundles to get started with the game's visual design.
+
+## 📁 Project Structure
+- `/frontend` - Game client code
+- `/backend` - Game server code
+- `/scripts` - Development utility scripts
+
+## 🚀 Getting Started
+
+See the README files in the [frontend](/frontend) and [backend](/backend) directories for setup instructions.
