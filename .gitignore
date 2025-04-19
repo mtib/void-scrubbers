@@ -1,0 +1,88 @@
+# Compiled files
+*.com
+*.class
+*.dll
+*.exe
+*.o
+*.so
+*.dylib
+
+# Packages and dependencies
+node_modules/
+package-lock.json
+yarn.lock
+bower_components/
+jspm_packages/
+.pnp/
+.pnp.js
+*.tgz
+.nuxt
+.npm
+.yarn
+.yarn-integrity
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs and databases
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+*.sql
+*.sqlite
+*.sqlite3
+.DS_Store
+Thumbs.db
+
+# Build output
+dist/
+build/
+out/
+.next/
+.output/
+.cache/
+
+# Editor directories and files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.vs/
+*.sublime-workspace
+*.sublime-project
+
+# Game development specific
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+UserSettings/
+MemoryCaptures/
+Assets/AssetStoreTools*
+*.apk
+*.unitypackage
+sysinfo.txt
+/[Bb]in/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Icon?
+
+# Crash logs
+crash-*
+
+# Local configuration
+*.local.json
