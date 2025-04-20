@@ -14,7 +14,7 @@ export class TitleScene implements Scene {
 
     private time: number = 0;
 
-    constructor() {
+    constructor(public onStartClick: () => void) {
         this.container = new PIXI.Container();
 
         // Add a background with a subtle gradient
@@ -45,7 +45,7 @@ export class TitleScene implements Scene {
         this.startButton.y = 100;
         this.startButton.eventMode = 'static';
         this.startButton.cursor = 'pointer';
-        this.startButton.on('pointerdown', this.onStartClick.bind(this));
+        this.startButton.on('pointerdown', this.onStartClick);
 
         // Add hover effect
         this.startButton.on('pointerover', () => {
@@ -81,10 +81,6 @@ export class TitleScene implements Scene {
 
         // All players are in the menu mode
         GlobalPlayerManager.getInstance().setMenuMode(null, true);
-        // debug:
-        GlobalPlayerManager.getInstance().players.registerListener(null, (event) => {
-            Log.info(event.toString());
-        });
 
         // Add some sample log messages
         Log.system("Welcome to Void Scrubbers!");
@@ -132,6 +128,7 @@ export class TitleScene implements Scene {
         this.startButton.y = height / 2;
 
         // Position log at bottom left
+        this.log.resize(700, 200);
         this.log.setPosition(20, height - 220);
     }
 
@@ -146,9 +143,5 @@ export class TitleScene implements Scene {
 
         // Clean up children
         this.container.removeChildren();
-    }
-
-    private onStartClick(): void {
-        Log.loot("You found a new cleaning robot!");
     }
 }

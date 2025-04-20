@@ -3,6 +3,7 @@ import { SceneManager } from './game/SceneManager';
 import { TitleScene } from './scenes/TitleScene';
 import { theme } from './utils/theme';
 import GlobalGamepadListener from './game/GlobalGamepadListener';
+import PlayerSelectScene from './scenes/PlayerSelectScene';
 
 export class App {
     private app: PIXI.Application;
@@ -30,7 +31,10 @@ export class App {
         document.getElementById('app')?.appendChild(this.app.view as HTMLCanvasElement);
 
         // Register initial scene
-        this.sceneManager.addScene('title', new TitleScene());
+        this.sceneManager.addScene('title', new TitleScene(() => {
+            this.sceneManager.switchScene('playerSelect');
+        }));
+        this.sceneManager.addScene('playerSelect', new PlayerSelectScene());
 
         // Start with the title scene
         this.sceneManager.switchScene('title');

@@ -64,7 +64,7 @@ const DEFAULT_OPTIONS: LogOptions = {
     lineHeight: 20,
     background: {
         color: theme.colors.background.hex.paper,
-        alpha: 1.0,
+        alpha: 0.1,
     },
     fadeTime: 5000, // Time in ms before messages start to fade
 };
@@ -239,6 +239,7 @@ export class Log {
      */
     public update(delta: number): void {
         this.time += delta;
+        let mostRecentMessageAge = Infinity;
 
         // Update message alpha based on age
         const now = Date.now();
@@ -246,6 +247,10 @@ export class Log {
             const element = this.messageElements.get(message.id);
             if (element) {
                 const age = now - message.timestamp;
+
+                if (age < mostRecentMessageAge) {
+                    mostRecentMessageAge = age;
+                }
 
                 // Start fading after fadeTime
                 if (age > this.options.fadeTime!) {
@@ -256,6 +261,12 @@ export class Log {
                 }
             }
         }
+
+        if (mostRecentMessageAge > this.options.fadeTime! * 3) {
+            this.clear();
+        }
+
+        this.setVisible(mostRecentMessageAge <= this.options.fadeTime! * 3);
     }
 
     /**
