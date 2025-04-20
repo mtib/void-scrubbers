@@ -1,6 +1,7 @@
 import * as PIXI from 'pixi.js';
 import { SceneManager } from './game/SceneManager';
 import { TitleScene } from './scenes/TitleScene';
+import { theme } from './utils/theme';
 
 export class App {
     private app: PIXI.Application;
@@ -11,7 +12,7 @@ export class App {
         this.app = new PIXI.Application({
             width: window.innerWidth,
             height: window.innerHeight,
-            backgroundColor: 0x000000,
+            backgroundColor: theme.colors.background.hex.default,
             antialias: true,
             resolution: window.devicePixelRatio || 1,
             autoDensity: true
