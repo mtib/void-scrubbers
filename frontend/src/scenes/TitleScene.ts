@@ -1,7 +1,7 @@
 import * as PIXI from 'pixi.js';
 import { Scene } from '../types/Scene';
 import { theme } from '../utils/theme';
-import { Log, LogType } from '../components/Log';
+import { Log } from '../components/Log';
 
 export class TitleScene implements Scene {
     private container: PIXI.Container;
