@@ -2,6 +2,7 @@ import * as PIXI from 'pixi.js';
 import { Scene } from '../types/Scene';
 import { theme } from '../utils/theme';
 import { Log } from '../components/Log';
+import GlobalPlayerManager from '@/store/GlobalPlayerManager';
 
 export class TitleScene implements Scene {
     private container: PIXI.Container;
@@ -80,6 +81,11 @@ export class TitleScene implements Scene {
 
         // Initial resize to position elements
         this.resize(window.innerWidth, window.innerHeight);
+
+        // debug:
+        GlobalPlayerManager.getInstance().players.registerListener(null, (event) => {
+            Log.info(event.toString());
+        });
 
         // Add some sample log messages
         Log.system("Welcome to Void Scrubbers!");

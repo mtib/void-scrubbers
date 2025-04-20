@@ -1,0 +1,3 @@
+interface PlayerSeat {
+    index: number;
+}
