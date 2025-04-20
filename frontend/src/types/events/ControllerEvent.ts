@@ -1,12 +1,16 @@
 abstract class ControllerEvent {
     abstract name: string;
+    timestamp: number;
+
     constructor(
         public player: PlayerSeat
-    ) { }
+    ) {
+        this.timestamp = Date.now();
+    }
 
     toStringArgs(): string[][] {
         return [
-            ["player", this.player.index.toString()]
+            ["seat", this.player.index.toString()]
         ];
     }
 

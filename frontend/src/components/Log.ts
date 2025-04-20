@@ -58,13 +58,13 @@ export interface LogOptions {
  */
 const DEFAULT_OPTIONS: LogOptions = {
     maxMessages: 100,
-    width: 400,
+    width: 600,
     height: 200,
     padding: 10,
     lineHeight: 20,
     background: {
         color: theme.colors.background.hex.paper,
-        alpha: 0.1,
+        alpha: 1.0,
     },
     fadeTime: 5000, // Time in ms before messages start to fade
 };

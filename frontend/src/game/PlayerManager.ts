@@ -1,6 +1,12 @@
 import ControllerManager from "@/types/ControllerManager";
 import KeyboardMouseController from "./KeyboardMouseController";
 import ControllerEvent from "@/types/events/ControllerEvent";
+import GamepadController from "./GamepadController";
+
+export enum InputType {
+    KEYBOARD_AND_MOUSE,
+    GAMEPAD
+}
 
 class PlayerManager {
     private nextSeatId = 0;
@@ -9,28 +15,63 @@ class PlayerManager {
 
     private globalListeners: ((event: ControllerEvent) => void)[] = [];
 
+    private globalMenuMode = false;
+
     init(): void {
         this.seats = [];
         this.globalListeners = [];
         this.controllers = new Map();
-        this.addSeat();
+
+        // Add a default seat for the keyboard and mouse
+        this.addSeat(InputType.KEYBOARD_AND_MOUSE);
     }
 
-    addSeat(): void {
+    addSeat(input: InputType): boolean {
+        const registeredPlayerControllers = Array.from(this.controllers.values())
+            .filter(controller => controller !== null);
+
         const seatId = this.nextSeatId;
-        this.nextSeatId++;
-        this.seats.push({
+        const seat = {
             index: seatId,
-        });
-        if (this.controllers.size === 0) {
+        };
+        this.nextSeatId++;
+        this.seats.push(seat);
+
+        if (input === InputType.KEYBOARD_AND_MOUSE) {
+            const existingKeyboardPlayerController = registeredPlayerControllers
+                .find(controller => controller instanceof KeyboardMouseController);
+            if (existingKeyboardPlayerController) {
+                return false;
+            }
             const controller = new KeyboardMouseController();
-            controller.init(this.seats[0]);
+            controller.init(seat);
             controller.register((event: ControllerEvent) => {
                 this.globalListeners.forEach(callback => callback(event));
             });
-            this.controllers.set(this.seats[0], controller);
+            controller.setMenuMode(this.globalMenuMode);
+            this.controllers.set(seat, controller);
+            return true;
+        } else if (input === InputType.GAMEPAD) {
+            const controllers = navigator.getGamepads();
+            for (let i = 0; i < controllers.length; i++) {
+                const gamepad = controllers[i];
+                if (gamepad && gamepad.connected) {
+                    const existingPlayerController = registeredPlayerControllers.find(controller => controller instanceof GamepadController && controller.gamepadIndex === gamepad.index);
+                    if (existingPlayerController) {
+                        continue;
+                    }
+                    const controller = new GamepadController(gamepad.index);
+                    controller.init(seat);
+                    controller.register((event: ControllerEvent) => {
+                        this.globalListeners.forEach(callback => callback(event));
+                    });
+                    controller.setMenuMode(this.globalMenuMode);
+                    this.controllers.set(seat, controller);
+                }
+            }
         }
         // TODO auto assign a gamepad
+        return false;
     }
 
     removeSeat(seat: PlayerSeat): void {
@@ -57,6 +98,22 @@ class PlayerManager {
         const controller = this.controllers.get(seat);
         if (controller) {
             controller.unregister(callback);
+        }
+    }
+
+    setMenuMode(seat: PlayerSeat | null, menuMode: boolean): void {
+        if (!seat) {
+            this.globalMenuMode = menuMode;
+            this.controllers.forEach(controller => {
+                if (controller) {
+                    controller.setMenuMode(menuMode);
+                }
+            });
+            return;
+        }
+        const controller = this.controllers.get(seat);
+        if (controller) {
+            controller.setMenuMode(menuMode);
         }
     }
 }

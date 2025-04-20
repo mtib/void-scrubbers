@@ -3,6 +3,8 @@ import ControllerEvent from "./events/ControllerEvent";
 interface ControllerManager {
     init(playerSeat: PlayerSeat): void;
 
+    setMenuMode(menuMode: boolean): void;
+
     register(callback: (event: ControllerEvent) => void): void;
 
     unregister(callback: (event: ControllerEvent) => void): void;

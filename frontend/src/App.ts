@@ -2,6 +2,7 @@ import * as PIXI from 'pixi.js';
 import { SceneManager } from './game/SceneManager';
 import { TitleScene } from './scenes/TitleScene';
 import { theme } from './utils/theme';
+import GlobalGamepadListener from './game/GlobalGamepadListener';
 
 export class App {
     private app: PIXI.Application;
@@ -17,6 +18,8 @@ export class App {
             resolution: window.devicePixelRatio || 1,
             autoDensity: true
         });
+
+        GlobalGamepadListener.getInstance().init();
 
         // Create the scene manager
         this.sceneManager = new SceneManager(this.app.stage);

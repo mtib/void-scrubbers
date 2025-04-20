@@ -9,6 +9,14 @@ class RelativeAimEvent extends ControllerEvent {
     ) {
         super(player);
     }
+
+    toStringArgs(): string[][] {
+        return [
+            ...super.toStringArgs(),
+            ["dx", this.dx.toString()],
+            ["dy", this.dy.toString()],
+        ];
+    }
 }
 
 export default RelativeAimEvent;

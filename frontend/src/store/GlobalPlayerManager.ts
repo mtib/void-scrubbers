@@ -16,6 +16,10 @@ class GlobalPlayerManager {
         this.players = new PlayerManager();
         this.players.init();
     }
+
+    setMenuMode(player: PlayerSeat | null, menuMode: boolean) {
+        this.players.setMenuMode(player, menuMode);
+    }
 }
 
 export default GlobalPlayerManager;

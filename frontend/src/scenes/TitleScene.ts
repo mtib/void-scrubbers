@@ -65,10 +65,7 @@ export class TitleScene implements Scene {
         });
 
         // Create log component
-        this.log = Log.getInstance({
-            width: 400,
-            height: 200
-        });
+        this.log = Log.getInstance();
 
         // Add to container
         this.container.addChild(this.title);
@@ -82,6 +79,8 @@ export class TitleScene implements Scene {
         // Initial resize to position elements
         this.resize(window.innerWidth, window.innerHeight);
 
+        // All players are in the menu mode
+        GlobalPlayerManager.getInstance().setMenuMode(null, true);
         // debug:
         GlobalPlayerManager.getInstance().players.registerListener(null, (event) => {
             Log.info(event.toString());
@@ -133,7 +132,6 @@ export class TitleScene implements Scene {
         this.startButton.y = height / 2;
 
         // Position log at bottom left
-        this.log.resize(400, 200);
         this.log.setPosition(20, height - 220);
     }
 
