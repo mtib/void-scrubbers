@@ -50,5 +50,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: backend-binary
-          path: backend/target/release/void-scrubbers-backend
+          path: backend/target/release/void_scrubbers_api
           retention-days: 90
