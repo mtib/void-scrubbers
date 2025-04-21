@@ -38,6 +38,14 @@ export const theme = {
                 primary: 0xf5f5f5,
                 secondary: 0xc7c7c7,
             }
+        },
+        disabled: {
+            main: '#3d3d3d',   // Disabled color
+            light: '#5c5c5c',
+            hex: {
+                main: 0x3d3d3d,
+                light: 0x5c5c5c,
+            }
         }
     },
 
@@ -73,6 +81,12 @@ export const theme = {
             fontSize: 24,
             fontWeight: '600',
             fill: 0xf5f5f5, // text-primary
+        },
+        disabled: {
+            fontFamily: 'Sono',
+            fontSize: 24,
+            fontWeight: '600',
+            fill: 0x3d3d3d, // disabled-main
         }
     } as const,
 

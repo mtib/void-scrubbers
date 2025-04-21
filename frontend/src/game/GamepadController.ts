@@ -111,22 +111,22 @@ class GamepadController implements ControllerManager {
                 events.push(new MenuDirectionEvent(this.playerSeat, MenuDirection.LEFT));
             }
             if (leftStick.dy > 0.5 && lastLeftStick.dy <= 0.5) {
-                events.push(new MenuDirectionEvent(this.playerSeat, MenuDirection.DOWN));
+                events.push(new MenuDirectionEvent(this.playerSeat, MenuDirection.UP));
             }
             if (leftStick.dy < -0.5 && lastLeftStick.dy >= -0.5) {
-                events.push(new MenuDirectionEvent(this.playerSeat, MenuDirection.UP));
+                events.push(new MenuDirectionEvent(this.playerSeat, MenuDirection.DOWN));
             }
         } else {
             if (this.changedSince(lastRightStick, rightStick)) {
                 if (!this.inDeadzone(rightStick)) {
-                    events.push(new RelativeAimEvent(this.playerSeat, rightStick.dx, rightStick.dy));
+                    events.push(new RelativeAimEvent(this.playerSeat, rightStick.dx, -rightStick.dy));
                 } else {
                     events.push(new RelativeAimEvent(this.playerSeat, 0, 0));
                 }
             }
             if (this.changedSince(lastLeftStick, leftStick)) {
                 if (!this.inDeadzone(leftStick)) {
-                    events.push(new VelocityEvent(this.playerSeat, leftStick.dx, leftStick.dy));
+                    events.push(new VelocityEvent(this.playerSeat, leftStick.dx, -leftStick.dy));
                 } else {
                     events.push(new VelocityEvent(this.playerSeat, 0, 0));
                 }

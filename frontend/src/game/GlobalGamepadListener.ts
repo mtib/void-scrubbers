@@ -1,7 +1,4 @@
 import { Log } from '@/components/Log';
-import GlobalPlayerManager from '@/store/GlobalPlayerManager';
-
-import { InputType } from './PlayerManager';
 
 type GamepadActivityCallback = (gamepad: Gamepad, buttonIndex: number | null) => void;
 
@@ -21,7 +18,6 @@ class GlobalGamepadListener {
     onConnect(ev: GamepadEvent) {
         const gamepad = ev.gamepad;
         Log.info(`Gamepad connected: ${gamepad.id}`);
-        GlobalPlayerManager.getInstance().players.addSeat(InputType.GAMEPAD);
         this.activityListeners.forEach((listener) => {
             listener(gamepad, null);
         });

@@ -7,6 +7,7 @@ import { TitleScene } from './scenes/TitleScene';
 import { theme } from './utils/theme';
 import { apiGet } from './network/apiFetch';
 import { Log } from './components/Log';
+import GameWorld from './scenes/GameWorld';
 
 class App {
     private app: PIXI.Application;
@@ -37,7 +38,10 @@ class App {
         this.sceneManager.addScene('title', new TitleScene(() => {
             this.sceneManager.switchScene('playerSelect');
         }));
-        this.sceneManager.addScene('playerSelect', new PlayerSelectScene());
+        this.sceneManager.addScene('playerSelect', new PlayerSelectScene(() => {
+            this.sceneManager.switchScene('gameWorld');
+        }));
+        this.sceneManager.addScene('gameWorld', new GameWorld());
 
         // Start with the title scene
         this.sceneManager.switchScene('title');
@@ -53,7 +57,7 @@ class App {
             } catch (error) {
                 Log.error(`Failed to ping API: ${error}`);
             }
-        })()
+        })();
     }
 
     private update(delta: number): void {

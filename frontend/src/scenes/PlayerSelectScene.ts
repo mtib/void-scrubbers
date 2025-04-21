@@ -7,16 +7,21 @@ import GlobalPlayerManager from '@/store/GlobalPlayerManager';
 import { Scene } from '@/types/Scene';
 import { getShortName } from '@/utils/gamepad';
 import { theme } from '@/utils/theme';
+import ControllerManager from '@/types/ControllerManager';
+import KeyboardMouseController from '@/game/KeyboardMouseController';
+import GamepadController from '@/game/GamepadController';
 
 type UniquePlayerId = string;
 
-type PlayerData = {
+export type PlayerData = {
     displayName: string;
     uniqueId: UniquePlayerId;
 };
 
 abstract class SelectedInput {
+    readonly selectedAt: number = Date.now();
     abstract equals(other: SelectedInput): boolean;
+    abstract toControllerManager(): ControllerManager;
 }
 
 class KeyboardAndMouseInput extends SelectedInput {
@@ -25,6 +30,9 @@ class KeyboardAndMouseInput extends SelectedInput {
             return true;
         }
         return false;
+    }
+    toControllerManager(): ControllerManager {
+        return new KeyboardMouseController();
     }
 }
 
@@ -37,6 +45,9 @@ class GamepadInput extends SelectedInput {
             return this.gamepad.index === other.gamepad.index;
         }
         return false;
+    }
+    toControllerManager(): ControllerManager {
+        return new GamepadController(this.gamepad.index);
     }
 }
 
@@ -60,9 +71,13 @@ class PlayerSelectScene implements Scene {
 
     private inputMap: Map<UniquePlayerId, SelectedInput> = new Map();
 
-    static selectButtonWidth = 400;
+    static SELECT_BUTTON_WIDTH = 400;
+    static MAX_PLAYERS = 2;
+    static MIN_PLAYERS = 1;
 
-    constructor() {
+    constructor(
+        private startGame: () => void,
+    ) {
         this.container = new PIXI.Container();
         this.container.sortableChildren = true;
 
@@ -87,13 +102,13 @@ class PlayerSelectScene implements Scene {
         this.selectInputButtons = this.configuredPlayers.map((_, index) => {
             const selectInputButton = new Button('Select Input', () => {
                 this.resetSelectingInput(index);
-            }, { width: PlayerSelectScene.selectButtonWidth });
+            }, { width: PlayerSelectScene.SELECT_BUTTON_WIDTH });
             selectInputButton.add(this.container);
             return selectInputButton;
         });
 
         this.selectedInputTexts = this.configuredPlayers.map((_) => {
-            const selectedInputText = new PIXI.Text('<none>', theme.textStyles.button);
+            const selectedInputText = new PIXI.Text('<none>', theme.textStyles.disabled);
             selectedInputText.anchor.set(0.5, 0.5);
             this.container.addChild(selectedInputText);
             return selectedInputText;
@@ -101,8 +116,16 @@ class PlayerSelectScene implements Scene {
 
         this.startButton = new Button('Start Game', () => {
             // Start the game
-            Log.error('Starting the game not implemented yet');
-        });
+            const playerManager = GlobalPlayerManager.getInstance();
+            let index = 0;
+            this.inputMap.forEach((input, uniqueId) => {
+                const player = this.configuredPlayers.find((p) => p.uniqueId === uniqueId)!;
+                playerManager.players.assignSeat(index, player, input.toControllerManager());
+                index++;
+            });
+
+            this.startGame();
+        }, { disabled: true });
 
         this.container.addChild(this.title);
         this.addPlayerButton.add(this.container);
@@ -115,10 +138,13 @@ class PlayerSelectScene implements Scene {
             const input = this.inputMap.get(player.uniqueId);
             if (input instanceof KeyboardAndMouseInput) {
                 selectedInputText.text = 'Keyboard and Mouse';
+                selectedInputText.style = theme.textStyles.button;
             } else if (input instanceof GamepadInput) {
-                selectedInputText.text = `${getShortName(input.gamepad.id)}`;
+                selectedInputText.text = getShortName(input.gamepad);
+                selectedInputText.style = theme.textStyles.button;
             } else {
                 selectedInputText.text = '<none>';
+                selectedInputText.style = theme.textStyles.disabled;
             }
         });
     }
@@ -134,7 +160,22 @@ class PlayerSelectScene implements Scene {
             this.inputMap.delete(key);
         });
         this.inputMap.set(player.uniqueId, input);
+
+        if (this.inputMap.size > PlayerSelectScene.MAX_PLAYERS) {
+            const twoMostRecentInputs = Array.from(this.inputMap.entries()).sort((a, b) => {
+                return a[1].selectedAt - b[1].selectedAt;
+            }).slice(0, PlayerSelectScene.MAX_PLAYERS);
+            this.inputMap.forEach((_, key) => {
+                if (!twoMostRecentInputs.some(([k]) => k === key)) {
+                    this.inputMap.delete(key);
+                }
+            });
+        }
         this.updateSelectedInputTexts();
+
+        if (this.inputMap.size >= PlayerSelectScene.MIN_PLAYERS) {
+            this.startButton.setDisabled(false);
+        }
     }
 
     unbindActivityListeners: (() => void)[] = [];
@@ -205,7 +246,7 @@ class PlayerSelectScene implements Scene {
         this.title.position.set(width / 2, 10);
 
         const xSpacing = 50;
-        const x0 = width / 2 - xSpacing - PlayerSelectScene.selectButtonWidth / 2 - 100;
+        const x0 = width / 2 - xSpacing - PlayerSelectScene.SELECT_BUTTON_WIDTH / 2 - 100;
         this.configuredPlayers.forEach((_, index) => {
             const label = this.playerTexts[index];
             const selectedInputText = this.selectedInputTexts[index];

@@ -8,6 +8,9 @@ class VelocityEvent extends ControllerEvent {
         public dx: number,
         public dy: number
     ) {
+        const length = Math.sqrt(dx * dx + dy * dy);
+        dx = length === 0 ? 0 : dx / length;
+        dy = length === 0 ? 0 : dy / length;
         super(player);
     }
 
