@@ -1,4 +1,5 @@
 import { Log } from '@/components/Log';
+import { getWsUrl } from './apiUtils';
 
 /**
  * WebSocket client for real-time communication with the backend
@@ -12,11 +13,10 @@ export class WebSocketClient {
     private messageHandlers: Map<string, ((data: unknown) => void)[]> = new Map();
 
     constructor(
-        url: string = `ws://${window.location.host}/ws`,
         reconnectInterval: number = 3000,
         maxReconnectAttempts: number = 5
     ) {
-        this.url = url;
+        this.url = getWsUrl();
         this.reconnectInterval = reconnectInterval;
         this.maxReconnectAttempts = maxReconnectAttempts;
     }

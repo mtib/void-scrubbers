@@ -1,79 +1,78 @@
 #[macro_use]
 extern crate rocket;
+use rocket::fairing::{Fairing, Info, Kind};
+use rocket::http::{Header, Method};
+use rocket::{Request, Response};
+use std::env;
 
-use dotenv::dotenv;
-use rocket::fs::{FileServer, relative};
-use rocket::http::Method;
-use rocket::serde::json::{Json, Value};
-use rocket::{Build, Rocket};
-use rocket::routes;
-use tracing::{info, Level};
-use tracing_subscriber::FmtSubscriber;
-use std::thread;
+pub struct CORS;
 
-mod config;
-mod error;
-mod routes;
-mod models;
-mod services;
-mod controllers;
-mod db;
-mod auth;
-mod websocket;
+#[rocket::async_trait]
+impl Fairing for CORS {
+    fn info(&self) -> Info {
+        Info {
+            name: "CORS Fairing",
+            kind: Kind::Response,
+        }
+    }
 
-/// Initialize the application's logging system
-fn setup_logging() {
-    let subscriber = FmtSubscriber::builder()
-        .with_max_level(Level::INFO)
-        .finish();
+    async fn on_response<'r>(&self, request: &'r Request<'_>, response: &mut Response<'r>) {
+        if request.method() == Method::Options {
+            response.set_status(rocket::http::Status::NoContent);
+        }
 
-    tracing::subscriber::set_global_default(subscriber)
-        .expect("Failed to set up the global logger");
+        // In debug/development mode, allow any localhost origin
+        // In production, use the configured WEB_HOST environment variable
+        let origin = request.headers().get_one("Origin");
+        let (require_cors, cors_origin) = match (origin, cfg!(debug_assertions)) {
+            (Some(origin), true) if origin.starts_with("http://localhost") => {
+                (true, Some(origin.to_string()))
+            }
+            (Some(_), false) => (true, env::var("WEB_HOST").ok()),
+            _ => (false, None),
+        };
+        if require_cors {
+            if let Some(cors_origin) = cors_origin {
+                response.set_header(Header::new("Access-Control-Allow-Origin", cors_origin));
+            } else {
+                panic!("Warning: requiring CORS but no origin provided");
+            }
+            response.set_header(Header::new(
+                "Access-Control-Allow-Methods",
+                "GET, POST, PUT, DELETE, OPTIONS",
+            ));
+            response.set_header(Header::new(
+                "Access-Control-Allow-Headers",
+                "Content-Type, Authorization",
+            ));
+            response.set_header(Header::new("Access-Control-Allow-Credentials", "true"));
+        }
+    }
 }
 
-/// Configure and build the Rocket instance
-#[rocket::main]
-async fn main() -> Result<(), rocket::Error> {
-    // Load environment variables
-    dotenv().ok();
-    
-    // Set up logging
-    setup_logging();
-    
-    info!("Starting Void Scrubbers backend server");
-    
-    // Start WebSocket server in a separate thread
-    let ws_thread = thread::spawn(|| {
-        let rt = tokio::runtime::Runtime::new().expect("Failed to create Tokio runtime");
-        rt.block_on(async {
-            info!("Starting WebSocket server");
-            websocket::start_ws_server().await;
-        });
+#[get("/")]
+fn index() -> rocket::serde::json::Json<serde_json::Value> {
+    let data = serde_json::json!({
+        "message": "Hello, world!",
+        "version": "1.0.0",
+        "status": "online",
+        "features": ["authentication", "user management", "game state"],
+        "server_time": std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap()
+            .as_secs(),
     });
-    
-    // Connect to database
-    info!("Connecting to database");
-    let db_pool = match db::init_db().await {
-        Ok(pool) => {
-            info!("Database connection established");
-            pool
-        },
-        Err(e) => {
-            eprintln!("Failed to connect to database: {}", e);
-            // Continue without database for now - makes development easier
-            info!("Continuing without database connection");
-            sqlx::postgres::PgPool::connect("postgres://postgres:postgres@localhost/void_scrubbers")
-                .await
-                .expect("Failed to create empty database pool")
-        }
-    };
-    
-    // Start the Rocket web server
-    let rocket = rocket::build()
-        .mount("/", routes![routes::index])
-        .mount("/api/health", routes![routes::health::health_check])
-        .launch()
-        .await?;
-    
-    Ok(())
+    rocket::serde::json::Json(data)
+}
+
+#[options("/<_..>")]
+fn all_options() {
+    /* Intentionally left empty to just handle OPTIONS preflight requests */
+}
+
+#[launch]
+fn rocket() -> _ {
+    rocket::build()
+        .attach(CORS)
+        .mount("/", routes![index, all_options])
 }

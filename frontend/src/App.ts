@@ -5,6 +5,8 @@ import { SceneManager } from './game/SceneManager';
 import PlayerSelectScene from './scenes/PlayerSelectScene';
 import { TitleScene } from './scenes/TitleScene';
 import { theme } from './utils/theme';
+import { apiGet } from './network/apiFetch';
+import { Log } from './components/Log';
 
 class App {
     private app: PIXI.Application;
@@ -42,6 +44,16 @@ class App {
 
         // Start the animation loop
         this.app.ticker.add((delta) => this.update(delta));
+
+        (async () => {
+            try {
+                const response = await apiGet('/');
+                const data = await response.json();
+                Log.info(`Successfully pinged API: ${data.message}`);
+            } catch (error) {
+                Log.error(`Failed to ping API: ${error}`);
+            }
+        })()
     }
 
     private update(delta: number): void {

@@ -1,61 +1,39 @@
-FROM rust:1.86.0-slim AS builder
+# Use the official Rust image as the base image
+FROM rust:1.86.0-slim as builder
 
-WORKDIR /usr/src/app
+# Create a new empty shell project
+WORKDIR /usr/src/void_scrubbers_api
+RUN cargo init
 
-# Install dependencies for building
-RUN apt-get update && \
-    apt-get install -y pkg-config libssl-dev && \
-    rm -rf /var/lib/apt/lists/*
+# Copy over manifests
+COPY Cargo.toml ./
 
-# Create a dummy project to cache dependencies
-RUN cargo new --bin void-scrubbers-backend
-WORKDIR /usr/src/app/void-scrubbers-backend
-COPY Cargo.toml Cargo.lock* ./
+# This is a trick to cache dependencies
+# It will build all dependencies and cache them
+RUN cargo build --release
+RUN rm src/*.rs
 
-# Build the dummy project to cache dependencies
-RUN cargo build --release && \
-    rm -rf src/ && \
-    rm target/release/deps/void_scrubbers_backend*
+# Now copy the actual source code
+COPY src/ ./src/
 
-# Copy the actual source code
-COPY src ./src
-# Copy migrations if they exist
-COPY migrations* ./migrations/
+# Update the file date so cargo will actually rebuild the source
+RUN touch src/main.rs
 
-# Build the real application
+# Build the application
 RUN cargo build --release
 
-# Create a minimal runtime image
+# Runtime stage
 FROM debian:bookworm-slim
 
-# Install runtime dependencies
-RUN apt-get update && apt-get install -y \
-    ca-certificates \
-    libssl-dev \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
-
-WORKDIR /app
+# Install necessary dependencies for runtime
+RUN apt-get update && apt-get install -y libssl-dev ca-certificates && rm -rf /var/lib/apt/lists/*
 
 # Copy the binary from the builder stage
-COPY --from=builder /usr/src/app/void-scrubbers-backend/target/release/void-scrubbers-backend .
+COPY --from=builder /usr/src/void_scrubbers_api/target/release/void_scrubbers_api /usr/local/bin/void_scrubbers_api
 
-# Create directory for migrations if it doesn't exist
-RUN mkdir -p /app/migrations
-
-# Copy migrations from builder
-COPY --from=builder /usr/src/app/void-scrubbers-backend/migrations /app/migrations
-
-# Set environment variables
-ENV ROCKET_ADDRESS=0.0.0.0
-ENV ROCKET_PORT=8000
-ENV PORT=8000
-ENV WS_PORT=9000
+ENV ROCKET_ADDRESS "0.0.0.0"
 
 EXPOSE 8000
-EXPOSE 9000
 
-HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
-  CMD curl -f http://localhost:8000/api/health || exit 1
-
-CMD ["./void-scrubbers-backend"]
+# Run the binary
+CMD ["void_scrubbers_api"]
