@@ -5,7 +5,7 @@ import { theme } from './utils/theme';
 import GlobalGamepadListener from './game/GlobalGamepadListener';
 import PlayerSelectScene from './scenes/PlayerSelectScene';
 
-export class App {
+class App {
     private app: PIXI.Application;
     private sceneManager: SceneManager;
 
@@ -56,3 +56,5 @@ export class App {
         this.sceneManager.resize(window.innerWidth, window.innerHeight);
     }
 }
+
+export default App;
