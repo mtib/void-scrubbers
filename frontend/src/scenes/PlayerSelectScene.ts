@@ -163,7 +163,11 @@ class PlayerSelectScene implements Scene {
 
             // Gamepad input
             const gamepadListener = GlobalGamepadListener.getInstance();
-            const activityListener = (gamepad: Gamepad, _: number | null) => {
+            const activityListener = (gamepad: Gamepad, btn: number | null) => {
+                if (btn === null) {
+                    // Ignore connection event, we want to wait for a button press
+                    return;
+                }
                 this.assignPlayerInput(player, new GamepadInput(gamepad));
                 gamepadListener.unregisterActivityListener(activityListener);
                 this.resetSelectingInput();
