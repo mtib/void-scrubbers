@@ -2,6 +2,8 @@ import { Log } from '@/components/Log';
 import GlobalPlayerManager from '@/store/GlobalPlayerManager';
 import { InputType } from './PlayerManager';
 
+type GamepadActivityCallback = (gamepad: Gamepad, buttonIndex: number | null) => void;
+
 class GlobalGamepadListener {
     private static instance: GlobalGamepadListener;
 
@@ -19,6 +21,9 @@ class GlobalGamepadListener {
         const gamepad = ev.gamepad;
         Log.info(`Gamepad connected: ${gamepad.id}`);
         GlobalPlayerManager.getInstance().players.addSeat(InputType.GAMEPAD);
+        this.activityListeners.forEach((listener) => {
+            listener(gamepad, null);
+        });
     }
 
     onConnectHandler = this.onConnect.bind(this);
@@ -43,6 +48,64 @@ class GlobalGamepadListener {
     public destroy(): void {
         window.removeEventListener("gamepadconnected", this.onConnectHandler);
         window.removeEventListener("gamepaddisconnected", this.onDisconnectHandler);
+    }
+
+    private activityListeners: GamepadActivityCallback[] = [];
+
+    private isListeningForActivity = false;
+    private startListeningForActivity() {
+        if (this.isListeningForActivity) return;
+        this.isListeningForActivity = true;
+
+        const getCurrentButtonStateMap = () => {
+            const gamepads = navigator.getGamepads();
+            const currentButtonStateMap = new Map<number, boolean[]>();
+            gamepads.forEach((gamepad) => {
+                if (gamepad) {
+                    const buttonStates = gamepad.buttons.map(button => button.pressed);
+                    currentButtonStateMap.set(gamepad.index, buttonStates);
+                }
+            });
+            return currentButtonStateMap;
+        };
+
+        let lastButtonStateMap = getCurrentButtonStateMap();
+
+        const listen = () => {
+            if (this.activityListeners.length == 0) {
+                this.isListeningForActivity = false;
+                return;
+            }
+
+            const currentButtonStateMap = getCurrentButtonStateMap();
+
+            currentButtonStateMap.forEach((currentButtonStates, gamepadIndex) => {
+                const lastButtonStates = lastButtonStateMap.get(gamepadIndex);
+                if (lastButtonStates) {
+                    currentButtonStates.forEach((currentButtonState, buttonIndex) => {
+                        if (currentButtonState && !lastButtonStates[buttonIndex]) {
+                            const gamepad = navigator.getGamepads().find(g => g && g.index === gamepadIndex);
+                            if (gamepad) {
+                                this.activityListeners.forEach(listener => listener(gamepad, buttonIndex));
+                            }
+                        }
+                    });
+                }
+            });
+
+            lastButtonStateMap = currentButtonStateMap;
+            window.requestAnimationFrame(listen);
+        };
+        window.requestAnimationFrame(listen);
+    }
+
+    public registerActivityListener(callback: GamepadActivityCallback): void {
+        this.activityListeners.push(callback);
+        this.startListeningForActivity();
+    }
+
+    public unregisterActivityListener(callback: GamepadActivityCallback): void {
+        this.activityListeners = this.activityListeners.filter(listener => listener !== callback);
     }
 }
 

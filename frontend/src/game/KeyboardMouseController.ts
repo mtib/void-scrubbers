@@ -46,9 +46,11 @@ class KeyboardMouseController implements ControllerManager {
         return new KeyboardButtonPressedEvent(this.playerSeat, event.code, event.key);
     }
 
+    private unbindCallacks: (() => void)[] = [];
+
     init(playerSeat: PlayerSeat): void {
         this.playerSeat = playerSeat;
-        window.addEventListener('keydown', (event) => {
+        const handleKeyDown = (event: KeyboardEvent) => {
             const controllerEvent = this.eventFromKeyboard(event);
             if (controllerEvent === null) {
                 return;
@@ -56,11 +58,18 @@ class KeyboardMouseController implements ControllerManager {
             this.callbacks.forEach(callback => {
                 callback(controllerEvent);
             });
-        });
-        window.addEventListener('mousemove', (event) => {
+        };
+        const handleMouseMove = (event: MouseEvent) => {
             this.callbacks.forEach(callback => {
                 callback(new AbsoluteAimEvent(playerSeat, event.clientX, event.clientY));
             });
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        window.addEventListener('mousemove', handleMouseMove);
+
+        this.unbindCallacks.push(() => {
+            window.removeEventListener('keydown', handleKeyDown);
+            window.removeEventListener('mousemove', handleMouseMove);
         });
     }
 
@@ -77,6 +86,9 @@ class KeyboardMouseController implements ControllerManager {
     }
 
     destroy(): void {
+        this.unbindCallacks.forEach(unbind => {
+            unbind();
+        });
         this.callbacks = [];
     }
 }

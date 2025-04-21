@@ -1,5 +1,6 @@
 import * as PIXI from 'pixi.js';
 import { theme } from '../utils/theme';
+import AbstractComponent from './AbstractComponent';
 
 /**
  * Types of log messages with corresponding colors
@@ -37,61 +38,44 @@ export interface LogMessage {
     id: string;
 }
 
-/**
- * Log configuration options
- */
-export interface LogOptions {
-    maxMessages?: number;
-    width?: number;
-    height?: number;
-    padding?: number;
-    lineHeight?: number;
-    background?: {
-        color: number;
-        alpha: number;
-    };
-    fadeTime?: number;
-}
-
-/**
- * Default log options
- */
-const DEFAULT_OPTIONS: LogOptions = {
-    maxMessages: 100,
-    width: 600,
-    height: 200,
-    padding: 10,
-    lineHeight: 20,
-    background: {
-        color: theme.colors.background.hex.paper,
-        alpha: 0.1,
-    },
-    fadeTime: 5000, // Time in ms before messages start to fade
-};
 
 /**
  * A reusable log component that can display messages of different types
  */
-export class Log {
+export class Log extends AbstractComponent {
     private container: PIXI.Container;
     private background: PIXI.Graphics;
     private messagesContainer: PIXI.Container;
     private maskGraphics: PIXI.Graphics;
     private messages: LogMessage[] = [];
     private messageElements: Map<string, PIXI.Container> = new Map();
-    private options: LogOptions;
     private visibleMessageCount: number = 0;
     private scrollPosition: number = 0;
-    private time: number = 0;
 
     private static instance: Log | null = null;
 
     /**
+     * Default log options
+     */
+    static CONSTANTS = {
+        maxMessages: 100,
+        width: 600,
+        height: 200,
+        padding: 10,
+        lineHeight: 20,
+        background: {
+            color: theme.colors.background.hex.default,
+            alpha: 0.5,
+        },
+        fadeTime: 5000, // Time in ms before messages start to fade
+    } as const;
+
+    /**
      * Get the global log instance
      */
-    public static getInstance(options?: LogOptions): Log {
+    public static getInstance(): Log {
         if (!Log.instance) {
-            Log.instance = new Log(options);
+            Log.instance = new Log();
         }
         return Log.instance;
     }
@@ -162,8 +146,8 @@ export class Log {
     /**
      * Create a new log component
      */
-    constructor(options?: LogOptions) {
-        this.options = { ...DEFAULT_OPTIONS, ...options };
+    constructor() {
+        super("Log");
         this.container = new PIXI.Container();
 
         // Create the background
@@ -190,6 +174,8 @@ export class Log {
      * Add a message to the log
      */
     public addMessage(text: string, type: LogType = LogType.INFO): void {
+        console.log(`[${type}] ${text}`);
+
         const timestamp = Date.now();
         const id = `log-${timestamp}-${Math.random().toString(36).substr(2, 9)}`;
 
@@ -204,7 +190,7 @@ export class Log {
         this.messages.unshift(message);
 
         // Trim the array if it exceeds the maximum size
-        if (this.messages.length > (this.options.maxMessages || DEFAULT_OPTIONS.maxMessages!)) {
+        if (this.messages.length > Log.CONSTANTS.maxMessages) {
             const removed = this.messages.pop();
             if (removed && this.messageElements.has(removed.id)) {
                 const element = this.messageElements.get(removed.id);
@@ -234,12 +220,13 @@ export class Log {
         this.updateLayout();
     }
 
+    backgroundTagetAlpha = 0;
+
     /**
      * Update the log (call this in your scene's update loop)
      */
-    public update(delta: number): void {
-        this.time += delta;
-        let mostRecentMessageAge = Infinity;
+    override update(delta: number): void {
+        super.update(delta);
 
         // Update message alpha based on age
         const now = Date.now();
@@ -248,13 +235,9 @@ export class Log {
             if (element) {
                 const age = now - message.timestamp;
 
-                if (age < mostRecentMessageAge) {
-                    mostRecentMessageAge = age;
-                }
-
                 // Start fading after fadeTime
-                if (age > this.options.fadeTime!) {
-                    const fadeProgress = Math.min(1, (age - this.options.fadeTime!) / 3000);
+                if (age > Log.CONSTANTS.fadeTime) {
+                    const fadeProgress = Math.min(1, (age - Log.CONSTANTS.fadeTime) / 3000);
                     element.alpha = 1 - fadeProgress;
                 } else {
                     element.alpha = 1;
@@ -262,37 +245,22 @@ export class Log {
             }
         }
 
-        if (mostRecentMessageAge > this.options.fadeTime! * 3) {
-            this.clear();
+        const mostRecentMessage = this.messages[0];
+
+        if (!mostRecentMessage || now - mostRecentMessage.timestamp > Log.CONSTANTS.fadeTime + 3000) {
+            this.backgroundTagetAlpha = 0;
+        } else {
+            this.backgroundTagetAlpha = 1;
         }
 
-        this.setVisible(mostRecentMessageAge <= this.options.fadeTime! * 3);
-    }
-
-    /**
-     * Resize the log component
-     */
-    public resize(width: number, height: number): void {
-        this.options.width = width;
-        this.options.height = height;
-
-        this.updateBackground();
-        this.updateMask();
-        this.updateLayout();
+        this.background.alpha += (this.backgroundTagetAlpha - this.background.alpha) * 0.1 * delta;
     }
 
     /**
      * Get the PIXI container for this component
      */
-    public getContainer(): PIXI.Container {
+    public getPIXIDisplayObject(): PIXI.Container {
         return this.container;
-    }
-
-    /**
-     * Position the log on the screen
-     */
-    public setPosition(x: number, y: number): void {
-        this.container.position.set(x, y);
     }
 
     /**
@@ -324,7 +292,7 @@ export class Log {
             fill: config.color,
             fontSize: 14,
             wordWrap: true,
-            wordWrapWidth: (this.options.width || DEFAULT_OPTIONS.width!) - (this.options.padding || DEFAULT_OPTIONS.padding!) * 2,
+            wordWrapWidth: Log.CONSTANTS.width - Log.CONSTANTS.padding * 2,
         });
 
         // Format the message with timestamp
@@ -343,13 +311,11 @@ export class Log {
      * Update the background graphics
      */
     private updateBackground(): void {
-        const width = this.options.width || DEFAULT_OPTIONS.width!;
-        const height = this.options.height || DEFAULT_OPTIONS.height!;
-        const bgConfig = this.options.background || DEFAULT_OPTIONS.background!;
+        const bgConfig = Log.CONSTANTS.background;
 
         this.background.clear();
         this.background.beginFill(bgConfig.color, bgConfig.alpha);
-        this.background.drawRoundedRect(0, 0, width, height, 8);
+        this.background.drawRoundedRect(0, 0, Log.CONSTANTS.width, Log.CONSTANTS.height, 8);
         this.background.endFill();
     }
 
@@ -357,9 +323,9 @@ export class Log {
      * Update the mask for scrolling
      */
     private updateMask(): void {
-        const width = this.options.width || DEFAULT_OPTIONS.width!;
-        const height = this.options.height || DEFAULT_OPTIONS.height!;
-        const padding = this.options.padding || DEFAULT_OPTIONS.padding!;
+        const width = Log.CONSTANTS.width;
+        const height = Log.CONSTANTS.height;
+        const padding = Log.CONSTANTS.padding;
 
         this.maskGraphics.clear();
         this.maskGraphics.beginFill(0xFFFFFF);
@@ -371,7 +337,7 @@ export class Log {
      * Update the layout of all message elements
      */
     private updateLayout(): void {
-        const padding = this.options.padding || DEFAULT_OPTIONS.padding!;
+        const padding = Log.CONSTANTS.padding;
 
         // Reset the messages container position
         this.messagesContainer.position.set(padding, padding);
@@ -400,7 +366,7 @@ export class Log {
         const scrollDelta = event.deltaY * scrollFactor;
 
         const contentHeight = this.calculateContentHeight();
-        const viewHeight = (this.options.height || DEFAULT_OPTIONS.height!) - (this.options.padding || DEFAULT_OPTIONS.padding!) * 2;
+        const viewHeight = Log.CONSTANTS.height - Log.CONSTANTS.padding * 2;
 
         // Only allow scrolling if content height exceeds view height
         if (contentHeight > viewHeight) {

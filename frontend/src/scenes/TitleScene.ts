@@ -3,12 +3,12 @@ import { Scene } from '../types/Scene';
 import { theme } from '../utils/theme';
 import { Log } from '../components/Log';
 import GlobalPlayerManager from '@/store/GlobalPlayerManager';
+import Button from '@/components/Button';
 
 export class TitleScene implements Scene {
     private container: PIXI.Container;
     private title: PIXI.Text;
-    private startButton: PIXI.Container;
-    private startText: PIXI.Text;
+    private startButton: Button;
     private backgroundGraphics: PIXI.Graphics;
     private log: Log;
 
@@ -26,51 +26,18 @@ export class TitleScene implements Scene {
         this.title.anchor.set(0.5);
 
         // Create start button
-        this.startButton = new PIXI.Container();
-
-        const buttonBackground = new PIXI.Graphics();
-        buttonBackground.beginFill(theme.colors.secondary.hex.main);
-        buttonBackground.lineStyle(2, theme.colors.secondary.hex.light);
-        buttonBackground.drawRoundedRect(0, 0, 200, 50, 10);
-        buttonBackground.endFill();
-
-        this.startText = new PIXI.Text('Start Game', theme.textStyles.button);
-        this.startText.anchor.set(0.5);
-        this.startText.x = 100;
-        this.startText.y = 25;
-
-        this.startButton.addChild(buttonBackground);
-        this.startButton.addChild(this.startText);
-        this.startButton.x = -100; // Will be centered by resize
-        this.startButton.y = 100;
-        this.startButton.eventMode = 'static';
-        this.startButton.cursor = 'pointer';
-        this.startButton.on('pointerdown', this.onStartClick);
-
-        // Add hover effect
-        this.startButton.on('pointerover', () => {
-            buttonBackground.clear();
-            buttonBackground.beginFill(theme.colors.primary.hex.main);
-            buttonBackground.lineStyle(2, theme.colors.primary.hex.light);
-            buttonBackground.drawRoundedRect(0, 0, 200, 50, 10);
-            buttonBackground.endFill();
-        });
-
-        this.startButton.on('pointerout', () => {
-            buttonBackground.clear();
-            buttonBackground.beginFill(theme.colors.secondary.hex.main);
-            buttonBackground.lineStyle(2, theme.colors.secondary.hex.light);
-            buttonBackground.drawRoundedRect(0, 0, 200, 50, 10);
-            buttonBackground.endFill();
+        this.startButton = new Button('Start Game', this.onStartClick.bind(this), {
+            width: 200,
+            height: 50,
         });
 
         // Create log component
         this.log = Log.getInstance();
 
         // Add to container
+        this.log.add(this.container);
+        this.startButton.add(this.container);
         this.container.addChild(this.title);
-        this.container.addChild(this.startButton);
-        this.container.addChild(this.log.getContainer());
     }
 
     public init(parent: PIXI.Container): void {
@@ -124,17 +91,15 @@ export class TitleScene implements Scene {
         this.title.y = height / 3;
 
         // Center start button
-        this.startButton.x = (width - 200) / 2;
-        this.startButton.y = height / 2;
+        this.startButton.position = { x: (width - 200) / 2, y: height / 2 };
 
         // Position log at bottom left
-        this.log.resize(700, 200);
-        this.log.setPosition(20, height - 220);
+        this.log.position = { x: 20, y: height - 220 };
     }
 
     public destroy(): void {
         // Clean up event listeners
-        this.startButton.removeAllListeners();
+        this.startButton.remove();
 
         // Remove from parent
         if (this.container.parent) {
@@ -143,5 +108,6 @@ export class TitleScene implements Scene {
 
         // Clean up children
         this.container.removeChildren();
+        this.log.remove();
     }
 }
