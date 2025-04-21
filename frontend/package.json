@@ -8,13 +8,21 @@
         "build": "tsc && vite build",
         "preview": "vite preview",
         "test": "vitest run",
-        "test:watch": "vitest"
+        "test:watch": "vitest",
+        "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+        "lint:fix": "eslint . --ext ts,tsx --fix"
     },
     "dependencies": {
         "pixi.js": "^7.4.0"
     },
     "devDependencies": {
         "@types/node": "^22.14.1",
+        "@typescript-eslint/eslint-plugin": "^7.0.0",
+        "@typescript-eslint/parser": "^7.0.0",
+        "eslint": "^8.56.0",
+        "eslint-import-resolver-alias": "^1.1.2",
+        "eslint-import-resolver-typescript": "^3.6.1",
+        "eslint-plugin-import": "^2.29.1",
         "typescript": "^5.4.2",
         "vite": "^5.1.6",
         "vitest": "^1.2.2"

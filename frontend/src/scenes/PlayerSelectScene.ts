@@ -1,11 +1,12 @@
-import Button from "@/components/Button";
-import { Log } from "@/components/Log";
-import GlobalGamepadListener from "@/game/GlobalGamepadListener";
-import GlobalPlayerManager from "@/store/GlobalPlayerManager";
-import { Scene } from "@/types/Scene";
-import { getShortName } from "@/utils/gamepad";
-import { theme } from "@/utils/theme";
-import * as PIXI from "pixi.js";
+import * as PIXI from 'pixi.js';
+
+import Button from '@/components/Button';
+import { Log } from '@/components/Log';
+import GlobalGamepadListener from '@/game/GlobalGamepadListener';
+import GlobalPlayerManager from '@/store/GlobalPlayerManager';
+import { Scene } from '@/types/Scene';
+import { getShortName } from '@/utils/gamepad';
+import { theme } from '@/utils/theme';
 
 type UniquePlayerId = string;
 
@@ -73,7 +74,7 @@ class PlayerSelectScene implements Scene {
         this.addPlayerButton = new Button('Add Player', () => {
             this.resetSelectingInput();
             // Add a new player
-            Log.error("Adding a new player not implemented yet");
+            Log.error('Adding a new player not implemented yet');
         });
 
         this.playerTexts = this.configuredPlayers.map((player) => {
@@ -100,7 +101,7 @@ class PlayerSelectScene implements Scene {
 
         this.startButton = new Button('Start Game', () => {
             // Start the game
-            Log.error("Starting the game not implemented yet");
+            Log.error('Starting the game not implemented yet');
         });
 
         this.container.addChild(this.title);

@@ -1,4 +1,5 @@
 import * as PIXI from 'pixi.js';
+
 import { Scene } from '../types/Scene';
 
 export class SceneManager {

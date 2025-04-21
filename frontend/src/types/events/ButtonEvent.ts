@@ -1,7 +1,8 @@
-import ControllerEvent from "./ControllerEvent";
+import PlayerSeat from '../PlayerSeat';
+import ControllerEvent from './ControllerEvent';
 
 abstract class ButtonEvent extends ControllerEvent {
-    name = "ButtonEvent";
+    name = 'ButtonEvent';
     constructor(
         player: PlayerSeat,
         public button: string,
@@ -13,7 +14,7 @@ abstract class ButtonEvent extends ControllerEvent {
     toStringArgs(): string[][] {
         return [
             ...super.toStringArgs(),
-            ["button", this.button],
+            ['button', this.button],
         ];
     }
 }

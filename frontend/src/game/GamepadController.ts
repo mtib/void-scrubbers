@@ -1,13 +1,17 @@
-import ControllerManager from "@/types/ControllerManager";
-import ControllerEvent from "@/types/events/ControllerEvent";
-import MenuAcceptEvent from "@/types/events/MenuAcceptEvent";
-import MenuDirectionEvent, { MenuDirection } from "@/types/events/MenuDirectionEvent";
-import MenuRejectEvent from "@/types/events/MenuRejectEvent";
-import RelativeAimEvent from "@/types/events/RelativeAimEvent";
-import VelocityEvent from "@/types/events/VelocityEvent";
-import GamepadState, { StickState } from "@/types/GamepadState";
-import GamepadStateMapper from "@/types/GamepadStateMapper";
-import GenericGamepadMapper from "./GenericGamepadMapper";
+
+import ControllerManager from '@/types/ControllerManager';
+import ControllerEvent from '@/types/events/ControllerEvent';
+import MenuAcceptEvent from '@/types/events/MenuAcceptEvent';
+import MenuDirectionEvent, { MenuDirection } from '@/types/events/MenuDirectionEvent';
+import MenuRejectEvent from '@/types/events/MenuRejectEvent';
+import RelativeAimEvent from '@/types/events/RelativeAimEvent';
+import VelocityEvent from '@/types/events/VelocityEvent';
+import { GamepadState, StickState } from '@/types/GamepadState';
+import GamepadStateMapper from '@/types/GamepadStateMapper';
+import PlayerSeat from '@/types/PlayerSeat';
+
+import GenericGamepadMapper from './GenericGamepadMapper';
+
 
 class GamepadController implements ControllerManager {
     // private playerSeat: PlayerSeat | null = null;

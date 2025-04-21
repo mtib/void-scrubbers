@@ -1,7 +1,8 @@
-import ButtonEvent from "./ButtonEvent";
+import PlayerSeat from '../PlayerSeat';
+import ButtonEvent from './ButtonEvent';
 
 abstract class ButtonUpEvent extends ButtonEvent {
-    name = "ButtonUpEvent";
+    name = 'ButtonUpEvent';
     constructor(player: PlayerSeat, button: string) {
         super(player, button, false);
     }

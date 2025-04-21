@@ -1,4 +1,4 @@
-import GamepadState, { ButtonState, StickState } from "./GamepadState";
+import { ButtonState, GamepadState, StickState } from './GamepadState';
 
 interface GamepadStateMapper {
     getAButtonState(gamepadState: GamepadState): ButtonState;

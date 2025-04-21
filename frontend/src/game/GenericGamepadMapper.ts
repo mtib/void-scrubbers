@@ -1,5 +1,5 @@
-import GamepadState, { ButtonState, StickState } from "@/types/GamepadState";
-import GamepadStateMapper from "@/types/GamepadStateMapper";
+import { ButtonState, GamepadState, StickState } from '@/types/GamepadState';
+import GamepadStateMapper from '@/types/GamepadStateMapper';
 
 class GenericGamepadMapper implements GamepadStateMapper {
     getAButtonState(gamepadState: GamepadState): ButtonState {
@@ -57,19 +57,19 @@ class GenericGamepadMapper implements GamepadStateMapper {
         };
     }
     getTypeName(): string {
-        return "Generic";
+        return 'Generic';
     }
     getAButtonName(): string {
-        return "A";
+        return 'A';
     }
     getBButtonName(): string {
-        return "B";
+        return 'B';
     }
     getXButtonName(): string {
-        return "X";
+        return 'X';
     }
     getYButtonName(): string {
-        return "Y";
+        return 'Y';
     }
 }
 

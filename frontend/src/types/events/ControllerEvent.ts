@@ -1,3 +1,5 @@
+import PlayerSeat from '../PlayerSeat';
+
 abstract class ControllerEvent {
     abstract name: string;
     timestamp: number;
@@ -10,12 +12,12 @@ abstract class ControllerEvent {
 
     toStringArgs(): string[][] {
         return [
-            ["seat", this.player.index.toString()]
+            ['seat', this.player.index.toString()]
         ];
     }
 
     toString(): string {
-        return `${this.name}(${this.toStringArgs().map(([key, value]) => `${key}=${value}`).join(", ")})`;
+        return `${this.name}(${this.toStringArgs().map(([key, value]) => `${key}=${value}`).join(', ')})`;
     }
 }
 

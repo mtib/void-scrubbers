@@ -1,7 +1,8 @@
-import ControllerEvent from "./ControllerEvent";
+import PlayerSeat from '../PlayerSeat';
+import ControllerEvent from './ControllerEvent';
 
 class VelocityEvent extends ControllerEvent {
-    name = "VelocityEvent";
+    name = 'VelocityEvent';
     constructor(
         player: PlayerSeat,
         public dx: number,
@@ -13,8 +14,8 @@ class VelocityEvent extends ControllerEvent {
     toStringArgs(): string[][] {
         return [
             ...super.toStringArgs(),
-            ["dx", this.dx.toString()],
-            ["dy", this.dy.toString()],
+            ['dx', this.dx.toString()],
+            ['dy', this.dy.toString()],
         ];
     }
 }

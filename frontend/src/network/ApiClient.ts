@@ -24,7 +24,7 @@ export class ApiClient {
     /**
      * Perform a POST request
      */
-    public async post<T>(endpoint: string, data: any): Promise<T> {
+    public async post<T>(endpoint: string, data: unknown): Promise<T> {
         const response = await fetch(`${this.baseUrl}${endpoint}`, {
             method: 'POST',
             headers: {

@@ -1,7 +1,8 @@
-import MenuEvent from "./MenuEvent";
+import PlayerSeat from '../PlayerSeat';
+import MenuEvent from './MenuEvent';
 
 class MenuRejectEvent extends MenuEvent {
-    name = "MenuRejectEvent";
+    name = 'MenuRejectEvent';
     constructor(
         player: PlayerSeat,
     ) {

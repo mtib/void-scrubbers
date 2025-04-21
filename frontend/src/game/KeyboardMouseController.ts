@@ -1,10 +1,11 @@
-import ControllerManager from "@/types/ControllerManager";
-import AbsoluteAimEvent from "@/types/events/AbsoluteAimEvent";
-import ControllerEvent from "@/types/events/ControllerEvent";
-import KeyboardButtonPressedEvent from "@/types/events/KeyboardButtonPressedEvent";
-import MenuAcceptEvent from "@/types/events/MenuAcceptEvent";
-import MenuDirectionEvent, { MenuDirection } from "@/types/events/MenuDirectionEvent";
-import MenuRejectEvent from "@/types/events/MenuRejectEvent";
+import ControllerManager from '@/types/ControllerManager';
+import AbsoluteAimEvent from '@/types/events/AbsoluteAimEvent';
+import ControllerEvent from '@/types/events/ControllerEvent';
+import KeyboardButtonPressedEvent from '@/types/events/KeyboardButtonPressedEvent';
+import MenuAcceptEvent from '@/types/events/MenuAcceptEvent';
+import MenuDirectionEvent, { MenuDirection } from '@/types/events/MenuDirectionEvent';
+import MenuRejectEvent from '@/types/events/MenuRejectEvent';
+import PlayerSeat from '@/types/PlayerSeat';
 
 class KeyboardMouseController implements ControllerManager {
     private callbacks: ((event: ControllerEvent) => void)[] = [];

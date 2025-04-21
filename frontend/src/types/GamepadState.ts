@@ -9,5 +9,3 @@ export type GamepadState = {
     axesStates: number[];
     buttonStates: ButtonState[];
 };
-
-export default GamepadState;

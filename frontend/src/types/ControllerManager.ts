@@ -1,4 +1,5 @@
-import ControllerEvent from "./events/ControllerEvent";
+import ControllerEvent from './events/ControllerEvent';
+import PlayerSeat from './PlayerSeat';
 
 interface ControllerManager {
     init(playerSeat: PlayerSeat): void;

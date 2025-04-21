@@ -1,9 +1,10 @@
 import * as PIXI from 'pixi.js';
+
+import GlobalGamepadListener from './game/GlobalGamepadListener';
 import { SceneManager } from './game/SceneManager';
+import PlayerSelectScene from './scenes/PlayerSelectScene';
 import { TitleScene } from './scenes/TitleScene';
 import { theme } from './utils/theme';
-import GlobalGamepadListener from './game/GlobalGamepadListener';
-import PlayerSelectScene from './scenes/PlayerSelectScene';
 
 class App {
     private app: PIXI.Application;

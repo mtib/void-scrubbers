@@ -1,7 +1,10 @@
-import ControllerManager from "@/types/ControllerManager";
-import KeyboardMouseController from "./KeyboardMouseController";
-import ControllerEvent from "@/types/events/ControllerEvent";
-import GamepadController from "./GamepadController";
+
+import ControllerManager from '@/types/ControllerManager';
+import ControllerEvent from '@/types/events/ControllerEvent';
+import PlayerSeat from '@/types/PlayerSeat';
+
+import GamepadController from './GamepadController';
+import KeyboardMouseController from './KeyboardMouseController';
 
 export enum InputType {
     KEYBOARD_AND_MOUSE,

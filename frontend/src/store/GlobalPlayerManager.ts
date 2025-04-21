@@ -1,4 +1,5 @@
-import PlayerManager from "@/game/PlayerManager";
+import PlayerManager from '@/game/PlayerManager';
+import PlayerSeat from '@/types/PlayerSeat';
 
 class GlobalPlayerManager {
     static instance: GlobalPlayerManager;

@@ -1,4 +1,5 @@
-import MenuEvent from "./MenuEvent";
+import PlayerSeat from '../PlayerSeat';
+import MenuEvent from './MenuEvent';
 
 export enum MenuDirection {
     UP = 'up',
@@ -18,7 +19,7 @@ class MenuDirectionEvent extends MenuEvent {
     toStringArgs(): string[][] {
         return [
             ...super.toStringArgs(),
-            ["direction", this.direction],
+            ['direction', this.direction],
         ];
     }
 }

@@ -1,6 +1,8 @@
-import * as PIXI from "pixi.js";
-import AbstractComponent from "./AbstractComponent";
-import { theme } from "@/utils/theme";
+import * as PIXI from 'pixi.js';
+
+import { theme } from '@/utils/theme';
+
+import AbstractComponent from './AbstractComponent';
 
 type ButtonProps = {
     width: number;
@@ -25,7 +27,7 @@ class Button extends AbstractComponent {
         public onClick: () => void,
         options?: Partial<ButtonProps>
     ) {
-        super("Button");
+        super('Button');
 
         this.options = {
             ...Button.DEFAULT_PROPS,

@@ -1,7 +1,8 @@
-import ControllerEvent from "./ControllerEvent";
+import PlayerSeat from '../PlayerSeat';
+import ControllerEvent from './ControllerEvent';
 
 class AbsoluteAimEvent extends ControllerEvent {
-    name = "AbsoluteAimEvent";
+    name = 'AbsoluteAimEvent';
     constructor(
         player: PlayerSeat,
         public x: number,
@@ -13,8 +14,8 @@ class AbsoluteAimEvent extends ControllerEvent {
     toStringArgs(): string[][] {
         return [
             ...super.toStringArgs(),
-            ["x", this.x.toString()],
-            ["y", this.y.toString()],
+            ['x', this.x.toString()],
+            ['y', this.y.toString()],
         ];
     }
 }

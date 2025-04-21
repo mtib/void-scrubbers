@@ -1,3 +1,5 @@
+import { Log } from '@/components/Log';
+
 /**
  * WebSocket client for real-time communication with the backend
  */
@@ -7,7 +9,7 @@ export class WebSocketClient {
     private reconnectInterval: number;
     private reconnectAttempts: number = 0;
     private maxReconnectAttempts: number;
-    private messageHandlers: Map<string, ((data: any) => void)[]> = new Map();
+    private messageHandlers: Map<string, ((data: unknown) => void)[]> = new Map();
 
     constructor(
         url: string = `ws://${window.location.host}/ws`,
@@ -31,12 +33,12 @@ export class WebSocketClient {
             this.socket = new WebSocket(this.url);
 
             this.socket.onopen = () => {
-                console.log('WebSocket connected');
+                Log.info('WebSocket connected');
                 this.reconnectAttempts = 0;
             };
 
             this.socket.onclose = (event) => {
-                console.log(`WebSocket closed: ${event.code} ${event.reason}`);
+                Log.info(`WebSocket closed: ${event.code} ${event.reason}`);
                 this.socket = null;
 
                 // Attempt to reconnect
@@ -52,7 +54,7 @@ export class WebSocketClient {
 
             this.socket.onmessage = (event) => {
                 try {
-                    const message = JSON.parse(event.data);
+                    const message = JSON.parse(event.data as unknown as string) as unknown as { type: string; data: unknown };
                     const { type, data } = message;
 
                     // Dispatch to message handlers
@@ -72,7 +74,7 @@ export class WebSocketClient {
     /**
      * Send a message to the server
      */
-    public send(type: string, data: any): boolean {
+    public send(type: string, data: unknown): boolean {
         if (!this.socket || this.socket.readyState !== WebSocket.OPEN) {
             console.error('WebSocket is not connected');
             return false;
@@ -91,7 +93,7 @@ export class WebSocketClient {
     /**
      * Register a handler for a specific message type
      */
-    public on(type: string, handler: (data: any) => void): void {
+    public on(type: string, handler: (data: unknown) => void): void {
         if (!this.messageHandlers.has(type)) {
             this.messageHandlers.set(type, []);
         }
@@ -103,7 +105,7 @@ export class WebSocketClient {
     /**
      * Remove a handler for a specific message type
      */
-    public off(type: string, handler?: (data: any) => void): void {
+    public off(type: string, handler?: (data: unknown) => void): void {
         if (!handler) {
             // Remove all handlers for this type
             this.messageHandlers.delete(type);

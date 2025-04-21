@@ -1,9 +1,11 @@
 import * as PIXI from 'pixi.js';
+
+import Button from '@/components/Button';
+import GlobalPlayerManager from '@/store/GlobalPlayerManager';
+
+import { Log } from '../components/Log';
 import { Scene } from '../types/Scene';
 import { theme } from '../utils/theme';
-import { Log } from '../components/Log';
-import GlobalPlayerManager from '@/store/GlobalPlayerManager';
-import Button from '@/components/Button';
 
 export class TitleScene implements Scene {
     private container: PIXI.Container;
@@ -50,7 +52,7 @@ export class TitleScene implements Scene {
         GlobalPlayerManager.getInstance().setMenuMode(null, true);
 
         // Add some sample log messages
-        Log.system("Welcome to Void Scrubbers!");
+        Log.system('Welcome to Void Scrubbers!');
     }
 
     public update(delta: number): void {

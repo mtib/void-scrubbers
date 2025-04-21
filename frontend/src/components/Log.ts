@@ -1,6 +1,7 @@
 import * as PIXI from 'pixi.js';
-import { theme } from '../utils/theme';
+
 import AbstractComponent from './AbstractComponent';
+import { theme } from '../utils/theme';
 
 /**
  * Types of log messages with corresponding colors
@@ -147,7 +148,7 @@ export class Log extends AbstractComponent {
      * Create a new log component
      */
     constructor() {
-        super("Log");
+        super('Log');
         this.container = new PIXI.Container();
 
         // Create the background
@@ -174,6 +175,7 @@ export class Log extends AbstractComponent {
      * Add a message to the log
      */
     public addMessage(text: string, type: LogType = LogType.INFO): void {
+        // eslint-disable-next-line no-console
         console.log(`[${type}] ${text}`);
 
         const timestamp = Date.now();

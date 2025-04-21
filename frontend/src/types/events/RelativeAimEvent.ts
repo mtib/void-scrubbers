@@ -1,7 +1,8 @@
-import ControllerEvent from "./ControllerEvent";
+import PlayerSeat from '../PlayerSeat';
+import ControllerEvent from './ControllerEvent';
 
 class RelativeAimEvent extends ControllerEvent {
-    name = "RelativeAimEvent";
+    name = 'RelativeAimEvent';
     constructor(
         player: PlayerSeat,
         public dx: number,
@@ -13,8 +14,8 @@ class RelativeAimEvent extends ControllerEvent {
     toStringArgs(): string[][] {
         return [
             ...super.toStringArgs(),
-            ["dx", this.dx.toString()],
-            ["dy", this.dy.toString()],
+            ['dx', this.dx.toString()],
+            ['dy', this.dy.toString()],
         ];
     }
 }

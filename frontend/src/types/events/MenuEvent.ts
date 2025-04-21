@@ -1,7 +1,8 @@
-import ControllerEvent from "./ControllerEvent";
+import PlayerSeat from '../PlayerSeat';
+import ControllerEvent from './ControllerEvent';
 
 abstract class MenuEvent extends ControllerEvent {
-    name = "MenuModeEvent";
+    name = 'MenuModeEvent';
     constructor(
         player: PlayerSeat,
     ) {

@@ -1,7 +1,8 @@
-import ButtonEvent from "./ButtonEvent";
+import PlayerSeat from '../PlayerSeat';
+import ButtonEvent from './ButtonEvent';
 
 class KeyboardButtonPressedEvent extends ButtonEvent {
-    name = "KeyboardButtonPressedEvent";
+    name = 'KeyboardButtonPressedEvent';
     constructor(player: PlayerSeat, button: string, public formatted: string) {
         super(player, button, true);
     }
@@ -9,7 +10,7 @@ class KeyboardButtonPressedEvent extends ButtonEvent {
     toStringArgs(): string[][] {
         return [
             ...super.toStringArgs(),
-            ["formatted", `"${this.formatted}"`],
+            ['formatted', `"${this.formatted}"`],
         ];
     }
 }

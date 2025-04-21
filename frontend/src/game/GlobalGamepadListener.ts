@@ -1,5 +1,6 @@
 import { Log } from '@/components/Log';
 import GlobalPlayerManager from '@/store/GlobalPlayerManager';
+
 import { InputType } from './PlayerManager';
 
 type GamepadActivityCallback = (gamepad: Gamepad, buttonIndex: number | null) => void;
@@ -36,8 +37,8 @@ class GlobalGamepadListener {
     onDisconnectHandler = this.onDisconnect.bind(this);
 
     public init(): void {
-        window.addEventListener("gamepadconnected", this.onConnectHandler);
-        window.addEventListener("gamepaddisconnected", this.onDisconnectHandler);
+        window.addEventListener('gamepadconnected', this.onConnectHandler);
+        window.addEventListener('gamepaddisconnected', this.onDisconnectHandler);
         navigator.getGamepads().forEach((gamepad) => {
             if (gamepad) {
                 Log.info(`Gamepad detected: ${gamepad.id}`);
@@ -46,8 +47,8 @@ class GlobalGamepadListener {
     }
 
     public destroy(): void {
-        window.removeEventListener("gamepadconnected", this.onConnectHandler);
-        window.removeEventListener("gamepaddisconnected", this.onDisconnectHandler);
+        window.removeEventListener('gamepadconnected', this.onConnectHandler);
+        window.removeEventListener('gamepaddisconnected', this.onDisconnectHandler);
     }
 
     private activityListeners: GamepadActivityCallback[] = [];
