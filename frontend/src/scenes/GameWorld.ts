@@ -1,5 +1,6 @@
 import { Log } from "@/components/Log";
 import Player from "@/components/Player";
+import audioLibrary, { Music } from "@/game/AudioLibrary";
 import GlobalPlayerManager from "@/store/GlobalPlayerManager";
 import PlayerSeat from "@/types/PlayerSeat";
 import { Scene } from "@/types/Scene";
@@ -22,6 +23,7 @@ class GameWorld implements Scene {
         this.setUpPlayers();
         this.resize(window.innerWidth, window.innerHeight);
         Log.getInstance().add(this.ui);
+        audioLibrary.playMusic(Music.CITY);
     }
 
     private setUpPlayers(): void {
@@ -31,9 +33,9 @@ class GameWorld implements Scene {
         assignments.forEach((controller, seat) => {
             const color = (() => {
                 if (seat.index % 2 === 0) {
-                    return 0xFF0000;
+                    return 0xFF3333;
                 } else {
-                    return 0x0000FF;
+                    return 0x5555FF;
                 }
             })();
             const player = new Player(seat, color, controller);

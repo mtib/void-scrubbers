@@ -10,6 +10,7 @@ import { theme } from '@/utils/theme';
 import ControllerManager from '@/types/ControllerManager';
 import KeyboardMouseController from '@/game/KeyboardMouseController';
 import GamepadController from '@/game/GamepadController';
+import audioLibrary, { Music } from '@/game/AudioLibrary';
 
 type UniquePlayerId = string;
 
@@ -227,6 +228,7 @@ class PlayerSelectScene implements Scene {
         this.resize(window.innerWidth, window.innerHeight);
         const playerManager = GlobalPlayerManager.getInstance();
         playerManager.setMenuMode(null, true);
+        audioLibrary.playMusic(Music.AI);
     }
 
     update(delta: number): void {

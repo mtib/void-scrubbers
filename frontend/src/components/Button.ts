@@ -3,6 +3,7 @@ import * as PIXI from 'pixi.js';
 import { theme } from '@/utils/theme';
 
 import AbstractComponent from './AbstractComponent';
+import audioLibrary, { Sound } from '@/game/AudioLibrary';
 
 type ButtonProps = {
     width: number;
@@ -57,12 +58,14 @@ class Button extends AbstractComponent {
         this.container.zIndex = 1; // Ensure the button is above other elements
         this.container.on('pointerdown', () => {
             if (this.options.disabled) return;
+            audioLibrary.playSound(Sound.CLICK);
             onClick();
         });
 
         // Add hover effect
         this.container.on('pointerover', () => {
             if (this.options.disabled) return;
+            audioLibrary.playSound(Sound.HOVER);
             this.drawBackground(true);
         });
 

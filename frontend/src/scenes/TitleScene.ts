@@ -2,15 +2,16 @@ import * as PIXI from 'pixi.js';
 
 import Button from '@/components/Button';
 import GlobalPlayerManager from '@/store/GlobalPlayerManager';
+import SoundButton from '@/components/SoundButton';
 
 import { Log } from '../components/Log';
 import { Scene } from '../types/Scene';
 import { theme } from '../utils/theme';
-
 export class TitleScene implements Scene {
     private container: PIXI.Container;
     private title: PIXI.Text;
     private startButton: Button;
+    private soundButton: SoundButton;
     private backgroundGraphics: PIXI.Graphics;
     private log: Log;
 
@@ -33,12 +34,16 @@ export class TitleScene implements Scene {
             height: 50,
         });
 
+        // Create sound button
+        this.soundButton = new SoundButton();
+
         // Create log component
         this.log = Log.getInstance();
 
         // Add to container
         this.log.add(this.container);
         this.startButton.add(this.container);
+        this.soundButton.add(this.container);
         this.container.addChild(this.title);
     }
 
@@ -95,6 +100,9 @@ export class TitleScene implements Scene {
         // Center start button
         this.startButton.position = { x: (width - 200) / 2, y: height / 2 };
 
+        // Position sound button in top right corner with padding
+        this.soundButton.position = { x: width - 40, y: 40 };
+
         // Position log at bottom left
         this.log.position = { x: 20, y: height - 220 };
     }
@@ -102,6 +110,7 @@ export class TitleScene implements Scene {
     public destroy(): void {
         // Clean up event listeners
         this.startButton.remove();
+        this.soundButton.remove();
 
         // Remove from parent
         if (this.container.parent) {
