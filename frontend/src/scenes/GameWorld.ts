@@ -1,6 +1,8 @@
 import { Log } from "@/components/Log";
 import Player from "@/components/Player";
 import audioLibrary, { Music } from "@/game/AudioLibrary";
+import RandomTileMapSource from "@/game/RandomTileMapSource";
+import TileMapRenderer from "@/game/TileMapRenderer";
 import GlobalPlayerManager from "@/store/GlobalPlayerManager";
 import PlayerSeat from "@/types/PlayerSeat";
 import { Scene } from "@/types/Scene";
@@ -12,11 +14,13 @@ class GameWorld implements Scene {
 
     private playerCharacters: Map<PlayerSeat, Player> = new Map();
     private parent: PIXI.Container | undefined;
+    private mapRenderer: TileMapRenderer = new TileMapRenderer(100, new RandomTileMapSource("test"));
 
     private time = 0;
 
     init(parent: PIXI.Container): void {
         this.entities.sortableChildren = true;
+        parent.addChild(this.mapRenderer);
         parent.addChild(this.entities);
         parent.addChild(this.ui);
         this.parent = parent;
@@ -68,6 +72,7 @@ class GameWorld implements Scene {
         });
         this.parent?.removeChild(this.entities);
         this.parent?.removeChild(this.ui);
+        this.parent?.removeChild(this.mapRenderer);
 
         Log.getInstance().remove();
         this.entities.destroy();
