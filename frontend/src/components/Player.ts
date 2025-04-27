@@ -6,6 +6,7 @@ import ControllerManager from '@/types/ControllerManager';
 import VelocityEvent from '@/types/events/VelocityEvent';
 import { theme } from '@/utils/theme';
 import OutlineFilter from '@/shaders/OutlineShader';
+import WorldPositionable from '@/types/WorldPositionable';
 
 const robo1Atlas = {
     frames: {
@@ -51,7 +52,7 @@ const spriteSheet = new PIXI.Spritesheet(
     await spriteSheet.parse();
 })();
 
-class Player extends AbstractComponent {
+class Player extends AbstractComponent implements WorldPositionable {
     private sprite: PIXI.AnimatedSprite;
     private container: PIXI.Container;
     private spriteContainer: PIXI.Container;
@@ -96,19 +97,29 @@ class Player extends AbstractComponent {
         this.container.addChild(this.nameTag);
     }
 
+    /**
+     * Get the world position of the player for camera following
+     */
+    getWorldPosition(): PIXI.Point {
+        // Return the base position of the sprite, not the container
+        // This ensures the character itself is what the camera tracks
+        return new PIXI.Point(this.sprite.x, this.sprite.y - this.sprite.height / 2);
+    }
+
     getPIXIDisplayObject(): PIXI.DisplayObject {
         return this.container;
     }
 
     resize(_width: number, _height: number): void {
+        // Nothing specific needed for resize, but we could handle screen-relative positioning here
     }
 
     update(delta: number): void {
         super.update(delta);
         const dx = (this.targetVelocity.dx - this.interpolatedVelocity.dx) * (1 / Player.floatyness) * delta;
         const dy = (this.targetVelocity.dy - this.interpolatedVelocity.dy) * (1 / Player.floatyness) * delta;
-        this.interpolatedVelocity.dy += dy;
 
+        // Apply movement physics with damping
         if (Math.abs(dx) > 0.01) {
             this.interpolatedVelocity.dx += dx;
         } else {
@@ -121,30 +132,35 @@ class Player extends AbstractComponent {
             this.interpolatedVelocity.dy = this.targetVelocity.dy;
         }
 
-        this.sprite.x += this.interpolatedVelocity.dx * delta * Player.movementSpeed;
-        this.sprite.y += this.interpolatedVelocity.dy * delta * Player.movementSpeed;
+        // Apply velocity to position
+        const newX = this.sprite.x + this.interpolatedVelocity.dx * delta * Player.movementSpeed;
+        const newY = this.sprite.y + this.interpolatedVelocity.dy * delta * Player.movementSpeed;
 
+        // Position updates are now handled by the GameWorld class to enforce boundaries
+        this.sprite.x = newX;
+        this.sprite.y = newY;
+
+        // Update animation state based on velocity
         if (this.interpolatedVelocity.dx !== 0 || this.interpolatedVelocity.dy !== 0) {
             this.sprite.play();
         } else {
             this.sprite.stop();
         }
+
+        // Update sprite direction based on movement
         if (this.interpolatedVelocity.dx > 0.1) {
             this.sprite.scale.x = Player.size;
         } else if (this.interpolatedVelocity.dx < -0.1) {
             this.sprite.scale.x = -Player.size;
         }
 
-        // Keep the player within the bounds of the world
-        if (this.sprite.x < 0) this.sprite.x = 0;
-        if (this.sprite.x > window.innerWidth) this.sprite.x = window.innerWidth;
-        if (this.sprite.y < 0) this.sprite.y = 0;
-        if (this.sprite.y > window.innerHeight) this.sprite.y = window.innerHeight;
-
+        // Update nameTag position to follow player
         this.nameTag.position.set(this.sprite.x, this.sprite.y + 5);
 
+        // Update visual effects
         this.drawGraphics();
 
+        // Update z-index for proper layering
         this.container.zIndex = this.sprite.y;
     }
 
