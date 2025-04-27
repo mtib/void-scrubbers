@@ -76,6 +76,9 @@ class TileMapRenderer extends PIXI.Container {
     private tileMap: PIXI.Container = new PIXI.Container();
     private debugDraw: boolean = false;
 
+    private mapWidth: number = 100;
+    private mapHeight: number = 100;
+
     constructor(public tileSize: number, private source: TileMapSource) {
         super();
         this.renderTileMap();
@@ -91,8 +94,8 @@ class TileMapRenderer extends PIXI.Container {
         this.tileMap.removeChildren();
 
         // First pass: build the tile map
-        for (let y = 0; y < 15; y++) {
-            for (let x = 0; x < 20; x++) {
+        for (let y = 0; y < this.mapHeight; y++) {
+            for (let x = 0; x < this.mapWidth; x++) {
                 const tileValue = data.find(tile => tile.x === x && tile.y === y);
                 if (tileValue === undefined) {
                     continue;
@@ -118,8 +121,8 @@ class TileMapRenderer extends PIXI.Container {
         }
 
         // Second pass: render tiles using marching squares-like algorithm
-        for (let y = 0; y < 14; y++) {
-            for (let x = 0; x < 19; x++) {
+        for (let y = 0; y < this.mapHeight - 1; y++) {
+            for (let x = 0; x < this.mapWidth - 1; x++) {
                 // Get the state of the 4 corners (top-left, top-right, bottom-right, bottom-left)
                 const topLeft = this.getTileType(map, x, y) === TileType.GRASS;
                 const topRight = this.getTileType(map, x + 1, y) === TileType.GRASS;

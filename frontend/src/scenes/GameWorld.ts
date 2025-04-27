@@ -33,7 +33,7 @@ class GameWorld implements Scene {
             followSpeed: 0.08, // Slightly improved follow speed
             zoomSpeed: 0.05,
             minZoom: 0.1,
-            maxZoom: 1.8,
+            maxZoom: 1.0,
             debugDraw: false
         });
     }
