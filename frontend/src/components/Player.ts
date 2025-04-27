@@ -5,6 +5,7 @@ import spriteSheetAsset from '@/assets/sprites/robo_1.png';
 import ControllerManager from '@/types/ControllerManager';
 import VelocityEvent from '@/types/events/VelocityEvent';
 import { theme } from '@/utils/theme';
+import OutlineFilter from '@/shaders/OutlineShader';
 
 const robo1Atlas = {
     frames: {
@@ -53,6 +54,7 @@ const spriteSheet = new PIXI.Spritesheet(
 class Player extends AbstractComponent {
     private sprite: PIXI.AnimatedSprite;
     private container: PIXI.Container;
+    private spriteContainer: PIXI.Container;
     private nameTag: PIXI.Text;
     private targetVelocity: { dx: number; dy: number; } = { dx: 0, dy: 0 };
     private graphics: PIXI.Graphics = new PIXI.Graphics();
@@ -81,17 +83,24 @@ class Player extends AbstractComponent {
         this.sprite.anchor.set(0.5, 1);
         this.sprite.scale.set(Player.size);
 
+        this.spriteContainer = new PIXI.Container();
+        this.spriteContainer.addChild(this.sprite);
+        this.spriteContainer.addChild(this.graphics);
+        this.spriteContainer.filters = [new OutlineFilter(color)];
+
         this.nameTag = new PIXI.Text(player.data.displayName, theme.textStyles.body);
         this.nameTag.anchor.set(0.5, 0);
 
         this.container = new PIXI.Container();
-        this.container.addChild(this.sprite);
+        this.container.addChild(this.spriteContainer);
         this.container.addChild(this.nameTag);
-        this.container.addChild(this.graphics);
     }
 
     getPIXIDisplayObject(): PIXI.DisplayObject {
         return this.container;
+    }
+
+    resize(_width: number, _height: number): void {
     }
 
     update(delta: number): void {
@@ -174,6 +183,18 @@ class Player extends AbstractComponent {
         const eyeOpenness = (this.time + this.blinkOffset) % (Player.blinkInterval + this.blinkIntervalRandomness) < Player.blinkInterval / 10 ? 0.2 : 1;
         drawEye(leftEyeDefaultPosition.x + this.interpolatedVelocity.dx * maxDx, leftEyeDefaultPosition.y + this.interpolatedVelocity.dy * maxDx * movementScale, Player.size, 1.5 * Player.size * eyeOpenness);
         drawEye(rightEyeDefaultPosition.x + this.interpolatedVelocity.dx * maxDx, rightEyeDefaultPosition.y + this.interpolatedVelocity.dy * maxDx * movementScale, Player.size, 1.5 * Player.size * eyeOpenness);
+
+        this.graphics.endFill();
+
+        // Hacky solution to enlarge the containing container to make space for the outline
+        this.graphics.beginFill(0x000000, 0.000001);
+        this.graphics.drawRect(
+            this.sprite.x - Player.size * 6,
+            this.sprite.y - Player.size * 17,
+            Player.size * 12,
+            Player.size * 18
+        );
+        this.graphics.endFill();
     }
 
     set x(value: number) {

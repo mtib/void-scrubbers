@@ -56,7 +56,10 @@ class GameWorld implements Scene {
         Log.getInstance().update(delta);
     }
 
-    resize(_width: number, _height: number): void {
+    resize(width: number, height: number): void {
+        this.playerCharacters.forEach((player) => {
+            player.resize(width, height);
+        });
     }
 
     destroy(): void {
