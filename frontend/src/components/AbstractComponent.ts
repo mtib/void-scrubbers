@@ -2,7 +2,7 @@ import * as PIXI from 'pixi.js';
 
 abstract class AbstractComponent {
     private parent: PIXI.Container | null = null;
-    private time: number = 0;
+    time: number = 0;
     name: string;
 
     constructor(name: string) {
@@ -26,7 +26,8 @@ abstract class AbstractComponent {
     set position(
         value: { x: number; y: number; }
     ) {
-        this.getPIXIDisplayObject().position.set(value.x, value.y);
+        this.x = value.x;
+        this.y = value.y;
     }
 
     update(

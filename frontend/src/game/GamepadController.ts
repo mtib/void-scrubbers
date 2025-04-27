@@ -14,7 +14,6 @@ import GenericGamepadMapper from './GenericGamepadMapper';
 
 
 class GamepadController implements ControllerManager {
-    // private playerSeat: PlayerSeat | null = null;
     public gamepadIndex: number;
     private playerSeat!: PlayerSeat;
     private callbacks: ((event: ControllerEvent) => void)[] = [];
