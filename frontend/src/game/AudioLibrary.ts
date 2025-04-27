@@ -69,12 +69,15 @@ function getMusicSource(music: Music): string {
 
 class AudioLibrary {
     private sounds: Map<Sound, HTMLAudioElement> = new Map();
-    private music: Map<Music, HTMLAudioElement> = new Map();
-    private currentMusic: HTMLAudioElement | null = null;
+    private audioContext: AudioContext | null = null;
+    private musicBuffers: Map<Music, AudioBuffer> = new Map();
+    private musicSources: Map<Music, AudioBufferSourceNode> = new Map();
+    private currentMusic: Music | null = null;
     public isMuted: boolean = true;
     private volume: number = 1.0;
     private musicVolume: number = 0.2;
     private soundVolume: number = 1.0;
+    private musicGainNode: GainNode | null = null;
 
     constructor() {
         // Initialize sound elements
@@ -86,15 +89,38 @@ class AudioLibrary {
             }
         });
 
-        // Initialize music elements
+        // Initialize Web Audio API for gapless music playback
+        this.initializeAudioContext();
+    }
+
+    private initializeAudioContext(): void {
+        // Create audio context on demand (needed for user interaction first)
+        if (!this.audioContext) {
+            this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+            this.musicGainNode = this.audioContext.createGain();
+            this.musicGainNode.gain.value = this.musicVolume * this.volume;
+            this.musicGainNode.connect(this.audioContext.destination);
+        }
+
+        // Preload music buffers
         Object.values(Music).forEach(music => {
             if (typeof music === 'number') {
-                const audio = new Audio(getMusicSource(music));
-                audio.loop = true;
-                audio.volume = this.musicVolume * this.volume;
-                this.music.set(music, audio);
+                this.loadMusicBuffer(music);
             }
         });
+    }
+
+    private async loadMusicBuffer(music: Music): Promise<void> {
+        if (!this.audioContext) return;
+
+        try {
+            const response = await fetch(getMusicSource(music));
+            const arrayBuffer = await response.arrayBuffer();
+            const audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
+            this.musicBuffers.set(music, audioBuffer);
+        } catch (error) {
+            console.error(`Failed to load music buffer for ${music}:`, error);
+        }
     }
 
     /**
@@ -115,33 +141,57 @@ class AudioLibrary {
      * Start playing background music
      */
     playMusic(music: Music, fadeIn: boolean = true): void {
-        if (this.currentMusic) {
+        if (this.currentMusic === music) return;
+
+        // Make sure audio context is running
+        if (!this.audioContext) {
+            this.initializeAudioContext();
+        } else if (this.audioContext.state === 'suspended') {
+            this.audioContext.resume();
+        }
+
+        // Stop current music if any
+        if (this.currentMusic !== null) {
             this.stopMusic(fadeIn);
         }
 
-        const audio = this.music.get(music);
-        if (audio) {
-            this.currentMusic = audio;
+        // Create and play new music source
+        const buffer = this.musicBuffers.get(music);
+        if (buffer && this.audioContext && this.musicGainNode) {
+            // Clean up previous source for this music if it exists
+            const oldSource = this.musicSources.get(music);
+            if (oldSource) {
+                oldSource.disconnect();
+            }
+
+            // Create new source
+            const source = this.audioContext.createBufferSource();
+            source.buffer = buffer;
+            source.loop = true;
 
             if (fadeIn) {
-                // Start at 0 volume and fade in
-                audio.volume = 0;
-                void audio.play();
-
-                let vol = 0;
-                const interval = setInterval(() => {
-                    vol += 0.05;
-                    if (vol >= this.musicVolume * this.volume) {
-                        vol = this.musicVolume * this.volume;
-                        clearInterval(interval);
-                    }
-                    audio.volume = vol;
-                }, 100);
+                // Start with gain at 0 and fade in
+                this.musicGainNode.gain.setValueAtTime(0, this.audioContext.currentTime);
+                this.musicGainNode.gain.linearRampToValueAtTime(
+                    this.musicVolume * this.volume,
+                    this.audioContext.currentTime + 1
+                );
             } else {
-                // Play at normal volume
-                audio.volume = this.musicVolume * this.volume;
-                void audio.play();
+                this.musicGainNode.gain.setValueAtTime(this.musicVolume * this.volume, this.audioContext.currentTime);
             }
+
+            // Connect and play
+            source.connect(this.musicGainNode);
+            source.start(0);
+
+            // Store the source
+            this.musicSources.set(music, source);
+            this.currentMusic = music;
+        } else if (!buffer) {
+            // If buffer isn't loaded yet, try to load it and then play
+            this.loadMusicBuffer(music).then(() => {
+                this.playMusic(music, fadeIn);
+            });
         }
     }
 
@@ -149,27 +199,25 @@ class AudioLibrary {
      * Stop the current background music
      */
     stopMusic(fadeOut: boolean = true): void {
-        if (!this.currentMusic) return;
+        if (this.currentMusic === null || !this.audioContext || !this.musicGainNode) return;
+
+        const source = this.musicSources.get(this.currentMusic);
+        if (!source) return;
 
         if (fadeOut) {
             // Fade out gradually
-            const audio = this.currentMusic;
-            let vol = audio.volume;
+            const currentTime = this.audioContext.currentTime;
+            this.musicGainNode.gain.linearRampToValueAtTime(0, currentTime + 1);
 
-            const interval = setInterval(() => {
-                vol -= 0.05;
-                if (vol <= 0) {
-                    vol = 0;
-                    clearInterval(interval);
-                    audio.pause();
-                    audio.currentTime = 0;
-                }
-                audio.volume = vol;
-            }, 100);
+            // Stop after fade completes
+            setTimeout(() => {
+                source.stop();
+                source.disconnect();
+            }, 1000);
         } else {
             // Stop immediately
-            this.currentMusic.pause();
-            this.currentMusic.currentTime = 0;
+            source.stop();
+            source.disconnect();
         }
 
         this.currentMusic = null;
@@ -186,10 +234,13 @@ class AudioLibrary {
             sound.volume = this.soundVolume * this.volume;
         });
 
-        // Update all music volumes
-        this.music.forEach(music => {
-            music.volume = this.musicVolume * this.volume;
-        });
+        // Update music volume through gain node
+        if (this.musicGainNode && !this.isMuted) {
+            this.musicGainNode.gain.setValueAtTime(
+                this.musicVolume * this.volume,
+                this.audioContext?.currentTime || 0
+            );
+        }
     }
 
     /**
@@ -210,10 +261,13 @@ class AudioLibrary {
     setMusicVolume(volume: number): void {
         this.musicVolume = Math.max(0, Math.min(1, volume));
 
-        // Update all music volumes
-        this.music.forEach(music => {
-            music.volume = this.musicVolume * this.volume;
-        });
+        // Update music volume through gain node
+        if (this.musicGainNode && !this.isMuted) {
+            this.musicGainNode.gain.setValueAtTime(
+                this.musicVolume * this.volume,
+                this.audioContext?.currentTime || 0
+            );
+        }
     }
 
     /**
@@ -228,18 +282,23 @@ class AudioLibrary {
                 sound.volume = 0;
             });
 
-            this.music.forEach(music => {
-                music.volume = 0;
-            });
+            // Mute music through gain node
+            if (this.musicGainNode) {
+                this.musicGainNode.gain.setValueAtTime(0, this.audioContext?.currentTime || 0);
+            }
         } else {
             // Restore volumes
             this.sounds.forEach(sound => {
                 sound.volume = this.soundVolume * this.volume;
             });
 
-            this.music.forEach(music => {
-                music.volume = this.musicVolume * this.volume;
-            });
+            // Restore music volume
+            if (this.musicGainNode) {
+                this.musicGainNode.gain.setValueAtTime(
+                    this.musicVolume * this.volume,
+                    this.audioContext?.currentTime || 0
+                );
+            }
         }
     }
 }
